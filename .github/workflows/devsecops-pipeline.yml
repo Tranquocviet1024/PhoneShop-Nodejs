@@ -144,13 +144,18 @@ jobs:
           
       - name: Upload ESLint Report
         uses: actions/upload-artifact@v4
+        if: hashFiles('Phone-Backend/eslint-report.json') != ''
         with:
           name: eslint-security-report
           path: ${{ env.BACKEND_DIR }}/eslint-report.json
+          if-no-files-found: ignore
 
       # SonarCloud Analysis
+      # NOTE: If this fails with "Automatic Analysis is enabled" error,
+      # go to SonarCloud → Project → Administration → Analysis Method
+      # and disable "Automatic Analysis" to use CI-based analysis instead
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarqube-scan-action@v5.0.0
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -298,23 +303,45 @@ jobs:
           sarif_file: 'trivy-backend-results.sarif'
 
       # Anchore Grype Scan
+      - name: Check if Backend Image Exists
+        id: check-backend-image
+        continue-on-error: true
+        run: |
+          if docker image inspect phoneshop-backend:${{ github.sha }} > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Anchore Grype Scan - Backend
         uses: anchore/scan-action@v3
-        if: always()
+        if: steps.check-backend-image.outputs.exists == 'true'
         continue-on-error: true
         with:
           image: phoneshop-backend:${{ github.sha }}
           fail-build: false
           severity-cutoff: high
+          output-format: sarif
+
+      - name: Check if Frontend Image Exists
+        id: check-frontend-image
+        continue-on-error: true
+        run: |
+          if docker image inspect phoneshop-frontend:${{ github.sha }} > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Anchore Grype Scan - Frontend
         uses: anchore/scan-action@v3
-        if: always()
+        if: steps.check-frontend-image.outputs.exists == 'true'
         continue-on-error: true
         with:
           image: phoneshop-frontend:${{ github.sha }}
           fail-build: false
           severity-cutoff: high
+          output-format: sarif
 
   # ========================================
   # 6. INFRASTRUCTURE AS CODE SCANNING
