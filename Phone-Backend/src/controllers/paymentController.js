@@ -425,7 +425,9 @@ exports.payosWebhook = async (req, res, next) => {
     });
 
     if (!payment) {
-      console.error('Payment not found for orderCode:', orderCode);
+      // Sanitize orderCode to prevent log injection (remove newlines/special chars)
+      const sanitizedOrderCode = String(orderCode).replace(/[\r\n\t]/g, '');
+      console.error('Payment not found for orderCode:', sanitizedOrderCode);
       return res.status(404).json({ error: 'Payment not found' });
     }
 

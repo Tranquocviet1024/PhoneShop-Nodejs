@@ -84,13 +84,17 @@ exports.safeReadFile = (filePath, baseDir) => {
       return null;
     }
 
-    // Check if file exists
-    if (!fs.existsSync(sanitizedPath)) {
+    // Atomic check and read - avoid TOCTOU race condition
+    // Use single operation instead of existsSync -> statSync -> readFileSync
+    let stats;
+    try {
+      stats = fs.statSync(sanitizedPath);
+    } catch (err) {
+      // File doesn't exist or permission error
       return null;
     }
 
     // Verify it's a file, not a directory
-    const stats = fs.statSync(sanitizedPath);
     if (!stats.isFile()) {
       return null;
     }

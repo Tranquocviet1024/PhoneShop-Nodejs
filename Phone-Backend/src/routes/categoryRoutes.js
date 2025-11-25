@@ -40,5 +40,3 @@ router.delete(
 );
 
 module.exports = router;
-
-module.exports = router;

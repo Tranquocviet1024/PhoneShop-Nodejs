@@ -6,9 +6,14 @@ const authenticateToken = async (req, res, next) => {
   try {
     // Get token from Authorization header
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-    if (!token) {
+    
+    // Validate header format: "Bearer <token>"
+    if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
+      return next(new ApiError(401, 'Invalid authorization header format'));
+    }
+    
+    const token = authHeader.split(' ')[1];
+    if (!token || token.length === 0) {
       return next(new ApiError(401, 'Access token is required'));
     }
 

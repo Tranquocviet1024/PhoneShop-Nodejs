@@ -40,7 +40,11 @@ exports.createOrder = async (req, res, next) => {
 
       // Optional: Show warning if stock is low (but still allow order creation)
       if (product.stock < item.quantity) {
-        console.warn(`⚠️  Low stock warning: Product ${product.name} - Available: ${product.stock}, Requested: ${item.quantity}`);
+        // Sanitize product name and numbers to prevent log injection
+        const sanitizedName = String(product.name).replace(/[\r\n\t]/g, '');
+        const sanitizedStock = parseInt(product.stock, 10) || 0;
+        const sanitizedQty = parseInt(item.quantity, 10) || 0;
+        console.warn(`⚠️  Low stock warning: Product ${sanitizedName} - Available: ${sanitizedStock}, Requested: ${sanitizedQty}`);
       }
     }
 

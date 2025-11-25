@@ -150,9 +150,15 @@ exports.signin = async (req, res, next) => {
 // Verify Token
 exports.verifyToken = async (req, res, next) => {
   try {
-    const token = req.headers['authorization']?.split(' ')[1];
-
-    if (!token) {
+    const authHeader = req.headers['authorization'];
+    
+    // Validate header format
+    if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
+      return next(new ApiError(400, 'Invalid authorization header format'));
+    }
+    
+    const token = authHeader.split(' ')[1];
+    if (!token || token.length === 0) {
       return next(new ApiError(400, 'Token is required'));
     }
 
@@ -219,8 +225,9 @@ exports.refreshAccessToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
 
-    if (!refreshToken) {
-      return next(new ApiError(400, 'Refresh token is required'));
+    // Validate refresh token is a non-empty string
+    if (!refreshToken || typeof refreshToken !== 'string' || refreshToken.trim().length === 0) {
+      return next(new ApiError(400, 'Valid refresh token is required'));
     }
 
     try {
