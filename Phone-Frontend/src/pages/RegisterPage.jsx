@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Camera } from 'lucide-react';
+import CCCDUpload from '../components/CCCDUpload';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showCCCDUpload, setShowCCCDUpload] = useState(false);
   const { register, user: authUser } = useAuth();
   const navigate = useNavigate();
 
@@ -35,6 +37,22 @@ const RegisterPage = () => {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleCCCDDataExtracted = (cccdData) => {
+    // Map CCCD data to form fields
+    setFormData((prev) => ({
+      ...prev,
+      fullName: cccdData.name || prev.fullName,
+      // You can add more mappings if you extend the form
+      // e.g., dateOfBirth: cccdData.dob, address: cccdData.residence, etc.
+    }));
+    
+    // Close the upload modal
+    setShowCCCDUpload(false);
+    
+    // Show success message
+    setSuccess('Đã tự động điền thông tin từ CCCD. Vui lòng kiểm tra và hoàn tất đăng ký.');
   };
 
   const handleSubmit = async (e) => {
@@ -107,6 +125,16 @@ const RegisterPage = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 mb-6">
+          {/* CCCD Auto-fill Button */}
+          <button
+            type="button"
+            onClick={() => setShowCCCDUpload(true)}
+            className="w-full px-4 py-3 border-2 border-dashed border-primary rounded-lg text-primary font-semibold hover:bg-primary hover:text-white transition flex items-center justify-center gap-2"
+          >
+            <Camera size={20} />
+            Tự động điền từ CCCD
+          </button>
+
           {/* Full Name */}
           <div>
             <label htmlFor="fullName" className="block text-sm font-semibold text-dark mb-2">
@@ -234,6 +262,14 @@ const RegisterPage = () => {
           </Link>
         </p>
       </div>
+
+      {/* CCCD Upload Modal */}
+      {showCCCDUpload && (
+        <CCCDUpload
+          onDataExtracted={handleCCCDDataExtracted}
+          onClose={() => setShowCCCDUpload(false)}
+        />
+      )}
     </main>
   );
 };

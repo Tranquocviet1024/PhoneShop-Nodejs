@@ -13,6 +13,7 @@ const uploadRoutes = require('./uploadRoutes');
 const profileRoutes = require('./profileRoutes');
 const roleRoutes = require('./roleRoutes');
 const auditRoutes = require('./auditRoutes');
+const ocrRoutes = require('./ocrRoutes');
 
 const router = express.Router();
 
@@ -30,6 +31,7 @@ router.use('/admin', adminRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/roles', roleRoutes);
 router.use('/audit', auditRoutes);
+router.use('/ocr', ocrRoutes);
 
 // Health check endpoint
 router.get('/health', (req, res) => {
