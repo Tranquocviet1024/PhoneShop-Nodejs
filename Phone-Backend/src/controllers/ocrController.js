@@ -1,8 +1,11 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
+const path = require('path');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
+const { sanitizeFilePath, safeDeleteFile, safeReadFile } = require('../utils/securityUtils');
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const UPLOADS_DIR = path.join(__dirname, '../../uploads/cccd');
 
 /**
  * Extract CCCD information from uploaded image using Gemini AI
@@ -13,10 +16,20 @@ exports.extractCCCDInfo = async (req, res, next) => {
       return next(new ApiError(400, 'No image file uploaded'));
     }
 
-    const imagePath = req.file.path;
+    // Validate and sanitize file path
+    const sanitizedPath = sanitizeFilePath(req.file.filename, UPLOADS_DIR);
+
+    if (!sanitizedPath) {
+      return next(new ApiError(400, 'Invalid file path'));
+    }
     
-    // Read image file
-    const imageData = fs.readFileSync(imagePath);
+    // Read image file safely
+    const imageData = safeReadFile(req.file.filename, UPLOADS_DIR);
+    
+    if (!imageData) {
+      return next(new ApiError(400, 'Failed to read image file'));
+    }
+    
     const base64Image = imageData.toString('base64');
 
     // Initialize Gemini model
@@ -57,15 +70,15 @@ exports.extractCCCDInfo = async (req, res, next) => {
     const cccdInfo = JSON.parse(text);
 
     // Cleanup uploaded file after processing
-    fs.unlinkSync(imagePath);
+    safeDeleteFile(req.file.filename, UPLOADS_DIR);
 
     return res.status(200).json(
       new ApiResponse(200, cccdInfo, 'CCCD information extracted successfully')
     );
   } catch (error) {
     // Cleanup file on error
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
+    if (req.file && req.file.filename) {
+      safeDeleteFile(req.file.filename, UPLOADS_DIR);
     }
     
     console.error('OCR Error:', error);

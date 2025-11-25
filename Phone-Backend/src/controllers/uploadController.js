@@ -1,6 +1,7 @@
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const path = require('path');
 const fs = require('fs');
+const { sanitizeFilePath, safeDeleteFile } = require('../utils/securityUtils');
 
 /**
  * POST /api/upload
@@ -26,10 +27,9 @@ exports.uploadImage = async (req, res, next) => {
     );
   } catch (error) {
     // Delete file if error occurs
-    if (req.file) {
-      fs.unlink(req.file.path, (err) => {
-        if (err) console.error('Error deleting file:', err);
-      });
+    if (req.file && req.file.filename) {
+      const uploadsDir = path.join(__dirname, '../../uploads');
+      safeDeleteFile(req.file.filename, uploadsDir);
     }
     next(error);
   }
@@ -43,20 +43,27 @@ exports.deleteImage = async (req, res, next) => {
   try {
     const { filename } = req.params;
 
-    // Validate filename (prevent directory traversal)
-    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+    // Sanitize and validate file path
+    const uploadsDir = path.join(__dirname, '../../uploads');
+    const sanitizedPath = sanitizeFilePath(filename, uploadsDir);
+
+    if (!sanitizedPath) {
       return next(new ApiError(400, 'Invalid filename'));
     }
 
-    const filePath = path.join(__dirname, '../../uploads', filename);
-
     // Check if file exists
-    if (!fs.existsSync(filePath)) {
+    if (!fs.existsSync(sanitizedPath)) {
       return next(new ApiError(404, 'File not found'));
     }
 
-    // Delete file
-    fs.unlinkSync(filePath);
+    // Verify it's a file, not directory
+    const stats = fs.statSync(sanitizedPath);
+    if (!stats.isFile()) {
+      return next(new ApiError(400, 'Invalid file'));
+    }
+
+    // Delete file safely
+    fs.unlinkSync(sanitizedPath);
 
     res.status(200).json(
       new ApiResponse(200, null, 'Image deleted successfully')
