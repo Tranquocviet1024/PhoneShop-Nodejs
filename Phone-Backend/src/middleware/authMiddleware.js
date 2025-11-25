@@ -5,14 +5,24 @@ const User = require('../models/User');
 const authenticateToken = async (req, res, next) => {
   try {
     // Get token from Authorization header
-    const authHeader = req.headers['authorization'];
+    let authHeader = req.headers['authorization'];
+    
+    // Handle case where header might be an array (duplicate headers)
+    if (Array.isArray(authHeader)) {
+      authHeader = authHeader[0];
+    }
     
     // Validate header format: "Bearer <token>"
     if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
       return next(new ApiError(401, 'Invalid authorization header format'));
     }
     
-    const token = authHeader.split(' ')[1];
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2) {
+      return next(new ApiError(401, 'Invalid authorization header format'));
+    }
+    
+    const token = parts[1];
     if (!token || token.length === 0) {
       return next(new ApiError(401, 'Access token is required'));
     }

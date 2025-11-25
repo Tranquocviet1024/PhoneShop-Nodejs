@@ -8,7 +8,6 @@ const PaymentSuccessPage = () => {
   const [checking, setChecking] = useState(true);
   
   const orderCode = searchParams.get('orderCode');
-  const status = searchParams.get('status');
 
   useEffect(() => {
     // Simulate checking payment status

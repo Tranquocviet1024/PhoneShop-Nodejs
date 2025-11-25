@@ -150,14 +150,24 @@ exports.signin = async (req, res, next) => {
 // Verify Token
 exports.verifyToken = async (req, res, next) => {
   try {
-    const authHeader = req.headers['authorization'];
+    let authHeader = req.headers['authorization'];
+    
+    // Handle case where header might be an array (duplicate headers)
+    if (Array.isArray(authHeader)) {
+      authHeader = authHeader[0];
+    }
     
     // Validate header format
     if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
       return next(new ApiError(400, 'Invalid authorization header format'));
     }
     
-    const token = authHeader.split(' ')[1];
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2) {
+      return next(new ApiError(400, 'Invalid authorization header format'));
+    }
+    
+    const token = parts[1];
     if (!token || token.length === 0) {
       return next(new ApiError(400, 'Token is required'));
     }

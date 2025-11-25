@@ -84,23 +84,32 @@ exports.safeReadFile = (filePath, baseDir) => {
       return null;
     }
 
-    // Atomic check and read - avoid TOCTOU race condition
-    // Use single operation instead of existsSync -> statSync -> readFileSync
-    let stats;
+    // Use atomic file descriptor approach to avoid TOCTOU
+    let fd;
     try {
-      stats = fs.statSync(sanitizedPath);
+      // Open file atomically - will fail if not a regular file
+      fd = fs.openSync(sanitizedPath, 'r');
+      
+      // Check if it's a regular file using fstat (operates on fd, not path)
+      const stats = fs.fstatSync(fd);
+      if (!stats.isFile()) {
+        fs.closeSync(fd);
+        return null;
+      }
+      
+      // Read from file descriptor
+      const buffer = Buffer.alloc(stats.size);
+      fs.readSync(fd, buffer, 0, stats.size, 0);
+      fs.closeSync(fd);
+      
+      return buffer;
     } catch (err) {
-      // File doesn't exist or permission error
+      // File doesn't exist, permission error, or not a regular file
+      if (fd !== undefined) {
+        try { fs.closeSync(fd); } catch {}
+      }
       return null;
     }
-
-    // Verify it's a file, not a directory
-    if (!stats.isFile()) {
-      return null;
-    }
-
-    // Read the file
-    return fs.readFileSync(sanitizedPath);
   } catch (error) {
     console.error('Error in safeReadFile:', error);
     return null;
