@@ -211,7 +211,7 @@ jobs:
         run: |
           npm ci
           npm run lint || true
-          npm test -- --coverage || true
+          npm run test:coverage || true
 
       - name: Frontend Code Quality
         working-directory: ${{ env.FRONTEND_DIR }}
