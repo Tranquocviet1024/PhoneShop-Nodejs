@@ -13,6 +13,13 @@ exports.uploadImage = async (req, res, next) => {
       return next(new ApiError(400, 'No file uploaded'));
     }
 
+    // Validate multer file object
+    if (!req.file.filename || typeof req.file.filename !== 'string' || 
+        req.file.filename.includes('..') || req.file.filename.includes('/') || 
+        req.file.filename.includes('\\')) {
+      return next(new ApiError(400, 'Invalid file upload'));
+    }
+
     // Generate file URL
     const fileUrl = `http://localhost:3000/uploads/${req.file.filename}`;
 
@@ -27,7 +34,9 @@ exports.uploadImage = async (req, res, next) => {
     );
   } catch (error) {
     // Delete file if error occurs
-    if (req.file && req.file.filename) {
+    if (req.file && req.file.filename && typeof req.file.filename === 'string' &&
+        !req.file.filename.includes('..') && !req.file.filename.includes('/') && 
+        !req.file.filename.includes('\\')) {
       const uploadsDir = path.join(__dirname, '../../uploads');
       safeDeleteFile(req.file.filename, uploadsDir);
     }

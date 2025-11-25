@@ -16,6 +16,13 @@ exports.extractCCCDInfo = async (req, res, next) => {
       return next(new ApiError(400, 'No image file uploaded'));
     }
 
+    // Validate multer file object
+    if (!req.file.filename || typeof req.file.filename !== 'string' || 
+        req.file.filename.includes('..') || req.file.filename.includes('/') || 
+        req.file.filename.includes('\\')) {
+      return next(new ApiError(400, 'Invalid file upload'));
+    }
+
     // Validate and sanitize file path
     const sanitizedPath = sanitizeFilePath(req.file.filename, UPLOADS_DIR);
 

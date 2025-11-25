@@ -9,6 +9,11 @@ on:
     # Chạy security scan hàng tuần vào 2:00 AM thứ 2
     - cron: '0 2 * * 1'
 
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
 env:
   NODE_VERSION: '18.x'
   BACKEND_DIR: './Phone-Backend'
@@ -171,20 +176,20 @@ jobs:
         continue-on-error: true
 
       - name: Upload Semgrep SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('semgrep.sarif') != ''
         with:
           sarif_file: semgrep.sarif
 
       # CodeQL Analysis
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: javascript
           queries: security-and-quality
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
   # ========================================
   # 4. CODE QUALITY & LINTING
@@ -285,7 +290,7 @@ jobs:
           fi
 
       - name: Upload Trivy Results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('trivy-backend-results.sarif') != ''
         continue-on-error: true
         with:
@@ -331,7 +336,7 @@ jobs:
           output_file_path: checkov-results.sarif
 
       - name: Upload Checkov SARIF
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('checkov-results.sarif') != ''
         continue-on-error: true
         with:
