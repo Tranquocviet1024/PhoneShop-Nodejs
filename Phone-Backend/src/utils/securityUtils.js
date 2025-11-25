@@ -135,3 +135,29 @@ exports.isPathSafe = (filePath, allowedDir) => {
   return resolvedPath.startsWith(resolvedBase + path.sep) || 
          resolvedPath === resolvedBase;
 };
+
+/**
+ * Validate URL is from trusted domain (prevent open redirect)
+ * @param {string} url - URL to validate
+ * @param {array} trustedDomains - List of trusted domains
+ * @returns {boolean} - True if URL is safe
+ */
+exports.isUrlSafe = (url, trustedDomains = []) => {
+  if (!url || typeof url !== 'string') {
+    return false;
+  }
+
+  try {
+    const urlObj = new URL(url);
+    
+    // Check if domain is in trusted list
+    const isTrusted = trustedDomains.some(domain => 
+      urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
+    );
+    
+    return isTrusted;
+  } catch (error) {
+    // Invalid URL
+    return false;
+  }
+};

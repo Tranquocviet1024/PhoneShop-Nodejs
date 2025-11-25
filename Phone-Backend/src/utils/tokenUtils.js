@@ -124,12 +124,15 @@ const verifyTokenSignature = (token, secret = process.env.JWT_REFRESH_SECRET) =>
 };
 
 /**
- * Decode token without verification
+ * Decode token without verification (USE ONLY for non-critical operations like getting expiration)
+ * WARNING: Do NOT use decoded data for authentication/authorization decisions
  * @param {string} token - JWT token
  * @returns {object|null} Decoded token or null
  */
 const decodeToken = (token) => {
   try {
+    // WARNING: This only decodes, does not verify signature!
+    // Only use for reading non-sensitive metadata (e.g., expiration time)
     return jwt.decode(token);
   } catch (error) {
     return null;
@@ -138,11 +141,15 @@ const decodeToken = (token) => {
 
 /**
  * Extract expiration time from token
+ * WARNING: Only use for display purposes, verify token before trusting exp claim
  * @param {string} token - JWT token
  * @returns {Date} Expiration date
  */
 const getTokenExpiration = (token) => {
   try {
+    // WARNING: jwt.decode() does NOT verify signature
+    // This is ONLY safe for reading expiration time for display
+    // Do NOT use decoded data for security decisions
     const decoded = jwt.decode(token);
     if (!decoded || !decoded.exp) {
       return null;

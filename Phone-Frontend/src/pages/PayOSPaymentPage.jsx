@@ -3,6 +3,27 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import { CreditCard, QrCode, Loader, CheckCircle, XCircle } from 'lucide-react';
 
+// Trusted PayOS domains
+const TRUSTED_PAYOS_DOMAINS = ['pay.payos.vn', 'dev.payos.vn', 'sandbox.payos.vn'];
+
+/**
+ * Validate if URL is from trusted PayOS domain
+ * @param {string} url - URL to validate
+ * @returns {boolean} - True if safe
+ */
+const isPayOSUrlSafe = (url) => {
+  if (!url || typeof url !== 'string') return false;
+  
+  try {
+    const urlObj = new URL(url);
+    return TRUSTED_PAYOS_DOMAINS.some(domain => 
+      urlObj.hostname === domain || urlObj.hostname.endsWith('.' + domain)
+    );
+  } catch {
+    return false;
+  }
+};
+
 const PayOSPaymentPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,9 +55,11 @@ const PayOSPaymentPage = () => {
       const data = response.data?.data;
       setPaymentData(data);
 
-      // Redirect to PayOS checkout page
-      if (data.checkoutUrl) {
+      // Validate and redirect to PayOS checkout page
+      if (data.checkoutUrl && isPayOSUrlSafe(data.checkoutUrl)) {
         window.location.href = data.checkoutUrl;
+      } else if (data.checkoutUrl) {
+        setError('URL thanh toán không hợp lệ. Vui lòng thử lại.');
       }
     } catch (err) {
       console.error('Payment creation error:', err);
@@ -153,12 +176,13 @@ const PayOSPaymentPage = () => {
               <p className="text-gray-600 mb-6">Quét mã QR hoặc truy cập link để thanh toán</p>
 
               {/* QR Code */}
-              {paymentData.qrCode && (
+              {paymentData.qrCode && isPayOSUrlSafe(paymentData.qrCode) && (
                 <div className="mb-6">
                   <img
                     src={paymentData.qrCode}
                     alt="PayOS QR Code"
                     className="mx-auto max-w-xs w-full"
+                    onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 </div>
               )}
@@ -166,21 +190,32 @@ const PayOSPaymentPage = () => {
               {/* Payment Link */}
               <div className="bg-gray-50 rounded-lg p-4 mb-4">
                 <p className="text-sm text-gray-600 mb-2">Link thanh toán:</p>
-                <a
-                  href={paymentData.checkoutUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:underline break-all"
-                >
-                  {paymentData.checkoutUrl}
-                </a>
+                {paymentData.checkoutUrl && isPayOSUrlSafe(paymentData.checkoutUrl) ? (
+                  <a
+                    href={paymentData.checkoutUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline break-all"
+                  >
+                    {paymentData.checkoutUrl}
+                  </a>
+                ) : (
+                  <p className="text-red-600 text-sm">URL không hợp lệ</p>
+                )}
               </div>
 
               {/* Actions */}
               <div className="flex gap-4">
                 <button
-                  onClick={() => window.location.href = paymentData.checkoutUrl}
-                  className="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-accent transition font-semibold"
+                  onClick={() => {
+                    if (isPayOSUrlSafe(paymentData.checkoutUrl)) {
+                      window.location.href = paymentData.checkoutUrl;
+                    } else {
+                      alert('URL thanh toán không hợp lệ');
+                    }
+                  }}
+                  disabled={!isPayOSUrlSafe(paymentData.checkoutUrl)}
+                  className="flex-1 bg-primary text-white py-3 rounded-lg hover:bg-accent transition font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Chuyển đến trang thanh toán
                 </button>
