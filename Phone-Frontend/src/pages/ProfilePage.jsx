@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Edit2, User, Mail, Phone, MapPin, Calendar } from 'lucide-react';
+import { LogOut, Edit2, User, Mail, Phone, MapPin, Calendar, Camera } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
+import CCCDUpload from '../components/CCCDUpload';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ const ProfilePage = () => {
   const [editData, setEditData] = useState({});
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showCCCDUpload, setShowCCCDUpload] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -51,6 +53,19 @@ const ProfilePage = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleCCCDDataExtracted = (cccdData) => {
+    // Map CCCD data to profile fields
+    setEditData(prev => ({
+      ...prev,
+      fullName: cccdData.name || prev.fullName,
+      address: cccdData.residence || prev.address,
+      // You can add more mappings as needed
+    }));
+    
+    setShowCCCDUpload(false);
+    setSuccess('Đã tự động điền thông tin từ CCCD. Vui lòng kiểm tra và lưu thay đổi.');
   };
 
   const handleUpdateProfile = async () => {
@@ -141,6 +156,16 @@ const ProfilePage = () => {
           {isEditing ? (
             // Edit Mode
             <div className="space-y-6">
+              {/* CCCD Auto-fill Button */}
+              <button
+                type="button"
+                onClick={() => setShowCCCDUpload(true)}
+                className="w-full px-4 py-3 border-2 border-dashed border-primary rounded-lg text-primary font-semibold hover:bg-primary hover:text-white transition flex items-center justify-center gap-2"
+              >
+                <Camera size={20} />
+                Tự động điền từ CCCD
+              </button>
+
               <div>
                 <label className="block text-sm font-bold text-dark mb-2">
                   <User size={18} className="inline mr-2" />
@@ -301,6 +326,14 @@ const ProfilePage = () => {
           Đăng Xuất
         </button>
       </div>
+
+      {/* CCCD Upload Modal */}
+      {showCCCDUpload && (
+        <CCCDUpload
+          onDataExtracted={handleCCCDDataExtracted}
+          onClose={() => setShowCCCDUpload(false)}
+        />
+      )}
     </main>
   );
 };
