@@ -1,0 +1,72 @@
+const { ApiError } = require('../utils/apiResponse');
+const { verifyAccessToken } = require('../utils/tokenUtils');
+const User = require('../models/User');
+
+const authenticateToken = async (req, res, next) => {
+  try {
+    // Get token from Authorization header
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+      return next(new ApiError(401, 'Access token is required'));
+    }
+
+    // Blacklist check function - lazy load TokenBlacklist to avoid circular dependency
+    const checkBlacklist = async (jti) => {
+      const TokenBlacklist = require('../models/TokenBlacklist');
+      const blacklistedToken = await TokenBlacklist.findByPk(jti);
+      return !!blacklistedToken;
+    };
+
+    // Verify token
+    const decoded = await verifyAccessToken(token, checkBlacklist);
+    req.user = decoded;
+
+    // Get user from database
+    const user = await User.findByPk(decoded.id);
+    if (!user || !user.isActive) {
+      return next(new ApiError(401, 'User not found or account is inactive'));
+    }
+
+    req.userId = decoded.id;
+    req.userRole = decoded.role;
+    req.user = user;
+    next();
+  } catch (error) {
+    next(new ApiError(401, 'Invalid or expired access token'));
+  }
+};
+
+const authorizeRole = (...allowedRoles) => {
+  return (req, res, next) => {
+    if (!allowedRoles.includes(req.userRole)) {
+      return next(new ApiError(403, 'You do not have permission to access this resource'));
+    }
+    next();
+  };
+};
+
+const checkPermission = (requiredPermission) => {
+  return async (req, res, next) => {
+    try {
+      const user = await User.findByPk(req.userId);
+      const userPermissions = typeof user.permissions === 'string'
+        ? JSON.parse(user.permissions)
+        : user.permissions || [];
+
+      if (!user || !userPermissions.includes(requiredPermission)) {
+        return next(new ApiError(403, `Permission '${requiredPermission}' is required`));
+      }
+      next();
+    } catch (error) {
+      next(new ApiError(500, 'Error checking permissions'));
+    }
+  };
+};
+
+module.exports = {
+  authenticateToken,
+  authorizeRole,
+  checkPermission,
+};
