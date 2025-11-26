@@ -1,5 +1,6 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
+const path = require('path');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const { sanitizeFilePath, safeDeleteFile, safeReadFile } = require('../utils/securityUtils');
 
