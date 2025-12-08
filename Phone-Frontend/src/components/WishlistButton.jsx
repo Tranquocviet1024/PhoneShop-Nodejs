@@ -11,6 +11,7 @@ const WishlistButton = ({ productId, className = '', size = 'md' }) => {
     if (user && productId) {
       checkWishlistStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, productId]);
 
   const checkWishlistStatus = async () => {

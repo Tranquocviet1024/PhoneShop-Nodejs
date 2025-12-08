@@ -17,6 +17,7 @@ const FlashSaleBanner = () => {
       updateCountdowns();
     }, 1000);
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flashSales]);
 
   const fetchFlashSales = async () => {

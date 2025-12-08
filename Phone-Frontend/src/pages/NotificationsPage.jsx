@@ -14,6 +14,7 @@ const NotificationsPage = () => {
 
   useEffect(() => {
     fetchNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const fetchNotifications = async (loadMore = false) => {
