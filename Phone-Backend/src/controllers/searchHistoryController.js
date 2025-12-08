@@ -138,7 +138,8 @@ exports.getSuggestions = async (req, res, next) => {
   try {
     const { q, limit = 5 } = req.query;
 
-    if (!q || q.length < 2) {
+    // ✅ FIXED: Type confusion - Validate q is a string before using .length
+    if (typeof q !== 'string' || q.length < 2) {
       return res.status(200).json(
         new ApiResponse(200, [], 'No suggestions')
       );
