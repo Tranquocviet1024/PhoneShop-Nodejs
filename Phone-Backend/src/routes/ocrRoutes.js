@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const ocrController = require('../controllers/ocrController');
 
@@ -18,7 +19,10 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/cccd/');
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    // Generate cryptographically secure unique filename
+    const timestamp = Date.now();
+    const randomBytes = crypto.randomBytes(8).toString('hex');
+    const uniqueSuffix = `${timestamp}-${randomBytes}`;
     cb(null, 'cccd-' + uniqueSuffix + path.extname(file.originalname));
   }
 });

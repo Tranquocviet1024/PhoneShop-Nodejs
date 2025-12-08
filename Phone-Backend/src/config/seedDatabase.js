@@ -52,10 +52,11 @@ const seedDatabase = async () => {
     }
 
     // Create admin user with ADMIN role and all permissions
+    // SECURITY: Default credentials for initial setup only - MUST be changed on first login
     const adminUser = await User.create({
       username: 'admin',
       email: 'admin@admin.com',
-      passwordHash: 'admin', // Will be hashed by User.beforeCreate hook
+      passwordHash: process.env.ADMIN_DEFAULT_PASSWORD || 'admin', // Will be hashed by User.beforeCreate hook
       fullName: 'Admin User',
       role: RoleEnum.ADMIN,
       permissions: PermissionEnum.defaultByRole[RoleEnum.ADMIN],

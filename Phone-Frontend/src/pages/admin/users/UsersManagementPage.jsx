@@ -179,7 +179,8 @@ const UsersManagementPage = () => {
     const newErrors = {};
     if (!formData.username.trim()) newErrors.username = 'Username is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    // Use ReDoS-safe email regex with limited quantifiers
+    if (!/^[a-zA-Z0-9._%+-]{1,64}@[a-zA-Z0-9.-]{1,255}\.[a-zA-Z]{2,}$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
     if (!isEditing && !formData.password) {
