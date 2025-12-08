@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, Eye, X } from 'lucide-react';
+import { Clock, X } from 'lucide-react';
 import RecentlyViewedService from '../services/RecentlyViewedService';
 import { useAuth } from '../context/AuthContext';
 
@@ -18,6 +18,7 @@ const RecentlyViewed = ({ limit = 6, showTitle = true }) => {
       setProducts(localViewed.slice(0, limit));
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, limit]);
 
   const fetchRecentlyViewed = async () => {

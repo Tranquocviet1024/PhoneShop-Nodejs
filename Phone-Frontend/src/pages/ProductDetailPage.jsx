@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Star, Truck, Shield, Heart, Share2, ChevronLeft, Scale } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Star, Truck, Shield, Heart, Share2, ChevronLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import WishlistService from '../services/WishlistService';
 import RecentlyViewedService from '../services/RecentlyViewedService';
-import ProductGallery from '../components/ProductGallery';
-import VariantSelector from '../components/VariantSelector';
-import RecentlyViewed from '../components/RecentlyViewed';
 import api from '../api/axiosConfig';
 
 const ProductDetailPage = () => {
@@ -20,14 +17,13 @@ const ProductDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
-  const [selectedVariant, setSelectedVariant] = useState(null);
-  const [productImages, setProductImages] = useState([]);
 
   // Check wishlist status when product loads
   useEffect(() => {
     if (user && id) {
       checkWishlistStatus();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, id]);
 
   // Track product view
@@ -35,6 +31,7 @@ const ProductDetailPage = () => {
     if (product) {
       trackProductView();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product]);
 
   const trackProductView = async () => {

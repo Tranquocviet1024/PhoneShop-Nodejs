@@ -12,12 +12,14 @@ const VariantSelector = ({ productId, onVariantChange, initialVariant = null }) 
 
   useEffect(() => {
     fetchVariants();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   useEffect(() => {
     if (selectedColor || selectedStorage) {
       findVariant();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedColor, selectedStorage]);
 
   const fetchVariants = async () => {

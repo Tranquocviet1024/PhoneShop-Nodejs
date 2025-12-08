@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Zap, Clock, ShoppingCart, ArrowLeft, Heart } from 'lucide-react';
+import { Zap, Clock, ShoppingCart } from 'lucide-react';
 import FlashSaleService from '../services/FlashSaleService';
 import { useCart } from '../context/CartContext';
 
@@ -18,6 +18,7 @@ const FlashSalePage = () => {
     } else {
       fetchAllFlashSales();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {

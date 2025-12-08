@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Zap, Plus, Edit2, Trash2, Clock, Package,
-  ChevronDown, ChevronUp, Save, X, Search
+  ChevronDown, ChevronUp, X, Search
 } from 'lucide-react';
 import FlashSaleService from '../../services/FlashSaleService';
 import ProductService from '../../services/ProductService';

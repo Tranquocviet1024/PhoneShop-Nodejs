@@ -11,6 +11,7 @@ const OrderTracking = ({ orderId }) => {
     if (orderId) {
       fetchTracking();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   const fetchTracking = async () => {

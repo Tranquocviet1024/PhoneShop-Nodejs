@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus } from 'lucide-react';
+import { X } from 'lucide-react';
 import CompareService from '../services/CompareService';
 
 const ProductCompare = ({ productIds = [], onClose, onRemoveProduct }) => {
@@ -11,6 +11,7 @@ const ProductCompare = ({ productIds = [], onClose, onRemoveProduct }) => {
     if (productIds.length >= 2) {
       fetchComparison();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productIds]);
 
   const fetchComparison = async () => {
