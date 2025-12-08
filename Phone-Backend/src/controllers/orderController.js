@@ -70,7 +70,14 @@ exports.createOrder = async (req, res, next) => {
     // Validate client total matches server calculation (allow small tolerance for rounding)
     const tolerance = 1; // 1 VND tolerance
     if (totalAmount && Math.abs(serverCalculatedTotal - totalAmount) > tolerance) {
-      console.warn(`Price mismatch: Client sent ${totalAmount}, Server calculated ${serverCalculatedTotal}`);
+      // ✅ FIXED: Log Injection - Sanitize numeric values and prevent injection
+      const sanitizedClientTotal = Number(totalAmount) || 0;
+      const sanitizedServerTotal = Number(serverCalculatedTotal) || 0;
+      console.warn('Price mismatch detected:', {
+        clientSent: sanitizedClientTotal,
+        serverCalculated: sanitizedServerTotal,
+        difference: Math.abs(sanitizedServerTotal - sanitizedClientTotal)
+      });
       // Use server-calculated total for security
     }
 

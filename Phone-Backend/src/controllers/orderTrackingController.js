@@ -140,6 +140,17 @@ exports.getOrdersByTrackingStatus = async (req, res, next) => {
     // Subquery để lấy trạng thái mới nhất của mỗi order
     const { sequelize } = require('../config/database');
     
+    // ✅ FIXED: SQL Injection vulnerability - Use parameterized query
+    const whereClause = status ? 'WHERE t.status = :status' : '';
+    const replacements = {
+      limit: parseInt(limit, 10),
+      offset: parseInt(offset, 10)
+    };
+    
+    if (status) {
+      replacements.status = status;
+    }
+    
     const orders = await sequelize.query(`
       SELECT o.*, t.status as trackingStatus, t.location, t.createdAt as lastUpdate
       FROM orders o
@@ -148,10 +159,13 @@ exports.getOrdersByTrackingStatus = async (req, res, next) => {
                ROW_NUMBER() OVER (PARTITION BY orderId ORDER BY createdAt DESC) as rn
         FROM order_trackings
       ) t ON o.orderId = t.orderId AND t.rn = 1
-      ${status ? `WHERE t.status = '${status}'` : ''}
+      ${whereClause}
       ORDER BY o.createdAt DESC
-      LIMIT ${limit} OFFSET ${offset}
-    `, { type: sequelize.QueryTypes.SELECT });
+      LIMIT :limit OFFSET :offset
+    `, { 
+      replacements,
+      type: sequelize.QueryTypes.SELECT 
+    });
 
     res.status(200).json(
       new ApiResponse(200, orders, 'Orders retrieved')
