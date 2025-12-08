@@ -34,6 +34,19 @@ const connectDB = async () => {
     const Role = require('../models/Role');
     const UserRole = require('../models/UserRole');
     const AuditLog = require('../models/AuditLog');
+    const Wishlist = require('../models/Wishlist');
+    const Coupon = require('../models/Coupon');
+    const CouponUsage = require('../models/CouponUsage');
+    const Notification = require('../models/Notification');
+    const SearchHistory = require('../models/SearchHistory');
+    const OrderTracking = require('../models/OrderTracking');
+    const Category = require('../models/Category');
+    const RecentlyViewed = require('../models/RecentlyViewed');
+    const FlashSale = require('../models/FlashSale');
+    const FlashSaleItem = require('../models/FlashSaleItem');
+    const InventoryAlert = require('../models/InventoryAlert');
+    const ProductImage = require('../models/ProductImage');
+    const ProductVariant = require('../models/ProductVariant');
 
     // User associations
     User.hasMany(Order, { foreignKey: 'userId' });
@@ -59,6 +72,66 @@ const connectDB = async () => {
     // Product associations
     Product.hasMany(Review, { foreignKey: 'productId' });
     Review.belongsTo(Product, { foreignKey: 'productId' });
+
+    // Note: Product uses 'category' STRING field for category name
+    // No foreign key relationship with Category table
+
+    // Wishlist associations
+    User.hasMany(Wishlist, { foreignKey: 'userId' });
+    Wishlist.belongsTo(User, { foreignKey: 'userId' });
+
+    Product.hasMany(Wishlist, { foreignKey: 'productId' });
+    Wishlist.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
+    // Coupon associations
+    Coupon.hasMany(CouponUsage, { foreignKey: 'couponId' });
+    CouponUsage.belongsTo(Coupon, { foreignKey: 'couponId' });
+
+    User.hasMany(CouponUsage, { foreignKey: 'userId' });
+    CouponUsage.belongsTo(User, { foreignKey: 'userId' });
+
+    // Note: CouponUsage.orderId is STRING (stores Order.orderId value like 'ORD-xxx')
+    // No foreign key relationship - it's a reference by order code, not by Order.id
+
+    // Notification associations
+    User.hasMany(Notification, { foreignKey: 'userId' });
+    Notification.belongsTo(User, { foreignKey: 'userId' });
+
+    // Search History associations
+    User.hasMany(SearchHistory, { foreignKey: 'userId' });
+    SearchHistory.belongsTo(User, { foreignKey: 'userId' });
+
+    // Order Tracking associations
+    // Note: OrderTracking.orderId is STRING (stores Order.orderId value like 'ORD-xxx')
+    // No foreign key relationship to Order.id - it's a reference by order code
+    User.hasMany(OrderTracking, { foreignKey: 'updatedBy', as: 'trackingUpdates' });
+    OrderTracking.belongsTo(User, { foreignKey: 'updatedBy', as: 'updater' });
+
+    // Recently Viewed associations
+    User.hasMany(RecentlyViewed, { foreignKey: 'userId' });
+    RecentlyViewed.belongsTo(User, { foreignKey: 'userId' });
+    Product.hasMany(RecentlyViewed, { foreignKey: 'productId' });
+    RecentlyViewed.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
+    // Flash Sale associations
+    FlashSale.hasMany(FlashSaleItem, { foreignKey: 'flashSaleId', as: 'items' });
+    FlashSaleItem.belongsTo(FlashSale, { foreignKey: 'flashSaleId' });
+    Product.hasMany(FlashSaleItem, { foreignKey: 'productId' });
+    FlashSaleItem.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+
+    // Inventory Alert associations
+    Product.hasMany(InventoryAlert, { foreignKey: 'productId' });
+    InventoryAlert.belongsTo(Product, { foreignKey: 'productId', as: 'product' });
+    User.hasMany(InventoryAlert, { foreignKey: 'resolvedBy', as: 'resolvedAlerts' });
+    InventoryAlert.belongsTo(User, { foreignKey: 'resolvedBy', as: 'resolver' });
+
+    // Product Image associations
+    Product.hasMany(ProductImage, { foreignKey: 'productId', as: 'images' });
+    ProductImage.belongsTo(Product, { foreignKey: 'productId' });
+
+    // Product Variant associations
+    Product.hasMany(ProductVariant, { foreignKey: 'productId', as: 'variants' });
+    ProductVariant.belongsTo(Product, { foreignKey: 'productId' });
 
     // Sync database models - use force: false to avoid recreating tables
     // NOTE: alter: true can cause "too many keys" error, use with caution

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Zap, Truck, Shield, Clock } from 'lucide-react';
+import { ChevronRight, Zap, Truck, Shield, Clock, Scale } from 'lucide-react';
 import ProductCard from '../components/ProductCard';
+import FlashSaleBanner from '../components/FlashSaleBanner';
+import RecentlyViewed from '../components/RecentlyViewed';
 import api from '../api/axiosConfig';
 
 const HomePage = () => {
@@ -96,6 +98,23 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* Flash Sale Banner */}
+      <section className="max-w-7xl mx-auto px-4 py-8">
+        <FlashSaleBanner />
+      </section>
+
+      {/* Compare Link */}
+      <section className="max-w-7xl mx-auto px-4">
+        <Link
+          to="/compare"
+          className="flex items-center justify-center gap-3 bg-blue-50 border-2 border-blue-200 rounded-lg p-4 hover:bg-blue-100 transition"
+        >
+          <Scale className="text-blue-600" size={24} />
+          <span className="font-semibold text-blue-700">So sánh sản phẩm - Chọn điện thoại phù hợp nhất</span>
+          <ChevronRight className="text-blue-600" size={20} />
+        </Link>
+      </section>
+
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-4 py-16">
         <div className="flex items-center justify-between mb-10">
@@ -141,6 +160,11 @@ const HomePage = () => {
             </button>
           </div>
         </div>
+      </section>
+
+      {/* Recently Viewed */}
+      <section className="max-w-7xl mx-auto px-4 pb-16">
+        <RecentlyViewed />
       </section>
     </main>
   );

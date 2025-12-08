@@ -1,17 +1,94 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Star, Truck, Shield, Heart, Share2, ChevronLeft } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Star, Truck, Shield, Heart, Share2, ChevronLeft, Scale } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
+import WishlistService from '../services/WishlistService';
+import RecentlyViewedService from '../services/RecentlyViewedService';
+import ProductGallery from '../components/ProductGallery';
+import VariantSelector from '../components/VariantSelector';
+import RecentlyViewed from '../components/RecentlyViewed';
 import api from '../api/axiosConfig';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [productImages, setProductImages] = useState([]);
+
+  // Check wishlist status when product loads
+  useEffect(() => {
+    if (user && id) {
+      checkWishlistStatus();
+    }
+  }, [user, id]);
+
+  // Track product view
+  useEffect(() => {
+    if (product) {
+      trackProductView();
+    }
+  }, [product]);
+
+  const trackProductView = async () => {
+    if (user) {
+      try {
+        await RecentlyViewedService.trackView(product.id);
+      } catch (error) {
+        console.error('Error tracking view:', error);
+      }
+    } else {
+      // Store in localStorage for guests
+      const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
+      const filtered = viewed.filter(p => p.id !== product.id);
+      filtered.unshift({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image
+      });
+      localStorage.setItem('recentlyViewed', JSON.stringify(filtered.slice(0, 20)));
+    }
+  };
+
+  const checkWishlistStatus = async () => {
+    try {
+      const response = await WishlistService.checkWishlist(id);
+      setIsFavorite(response.data?.inWishlist || false);
+    } catch (error) {
+      console.error('Error checking wishlist:', error);
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!user) {
+      alert('Vui lòng đăng nhập để thêm vào yêu thích');
+      navigate('/login');
+      return;
+    }
+
+    setWishlistLoading(true);
+    try {
+      if (isFavorite) {
+        await WishlistService.removeFromWishlist(id);
+        setIsFavorite(false);
+      } else {
+        await WishlistService.addToWishlist(id);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error('Error toggling wishlist:', error);
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   const fetchProduct = async () => {
     try {
@@ -208,12 +285,17 @@ const ProductDetailPage = () => {
                 Thêm vào giỏ hàng
               </button>
               <button
-                onClick={() => setIsFavorite(!isFavorite)}
-                className="px-6 py-3 border-2 border-primary text-primary rounded-lg font-bold hover:bg-primary hover:text-white transition"
+                onClick={handleToggleWishlist}
+                disabled={wishlistLoading}
+                className={`px-6 py-3 border-2 rounded-lg font-bold transition ${
+                  isFavorite 
+                    ? 'border-red-500 text-red-500 hover:bg-red-50' 
+                    : 'border-primary text-primary hover:bg-primary hover:text-white'
+                } ${wishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <Heart
                   size={20}
-                  className={isFavorite ? 'fill-current' : ''}
+                  className={isFavorite ? 'fill-current text-red-500' : ''}
                 />
               </button>
               <button className="px-6 py-3 border-2 border-gray-300 text-dark rounded-lg font-bold hover:bg-gray-100 transition">
@@ -236,18 +318,33 @@ const ProductDetailPage = () => {
         </div>
 
         {/* Specifications */}
-        {product.specifications && (
+        {product.specifications && product.specifications.length > 0 && (
           <div className="bg-white rounded-lg shadow-md p-8">
             <h2 className="text-2xl font-bold mb-6">Thông số kỹ thuật</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {product.specifications.map((spec, index) => (
-                <div key={index} className="flex gap-4 pb-4 border-b">
-                  <span className="font-semibold text-dark w-32 flex-shrink-0">
-                    {spec.label}
-                  </span>
-                  <span className="text-gray-600">{spec.value}</span>
-                </div>
-              ))}
+              {product.specifications.map((spec, index) => {
+                // Handle both string format "Label: Value" and object format {label, value}
+                let label, value;
+                if (typeof spec === 'string') {
+                  const parts = spec.split(':');
+                  label = parts[0]?.trim() || '';
+                  value = parts.slice(1).join(':').trim() || spec;
+                } else if (typeof spec === 'object' && spec !== null) {
+                  label = spec.label || spec.key || '';
+                  value = spec.value || '';
+                } else {
+                  return null;
+                }
+                
+                return (
+                  <div key={index} className="flex gap-4 pb-4 border-b">
+                    <span className="font-semibold text-dark w-32 flex-shrink-0">
+                      {label}
+                    </span>
+                    <span className="text-gray-600">{value}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

@@ -57,7 +57,13 @@ const authenticateToken = async (req, res, next) => {
 
 const authorizeRole = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!allowedRoles.includes(req.userRole)) {
+    // Flatten array if passed as array (e.g., authorizeRole(['ADMIN']))
+    const roles = allowedRoles.flat();
+    // Compare case-insensitively
+    const userRoleLower = req.userRole?.toLowerCase();
+    const hasRole = roles.some(role => role.toLowerCase() === userRoleLower);
+    
+    if (!hasRole) {
       return next(new ApiError(403, 'You do not have permission to access this resource'));
     }
     next();

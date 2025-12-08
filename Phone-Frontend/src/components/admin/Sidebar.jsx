@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, X, LogOut, BarChart3, Package, ShoppingCart, Users, Settings, Tag, Shield, FileText } from 'lucide-react';
+import { Menu, X, LogOut, BarChart3, Package, ShoppingCart, Users, Settings, Tag, Shield, FileText, Gift, Bell, Zap, AlertTriangle, Download } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, activeTab, setActiveTab, onLogout }) => {
@@ -12,6 +12,11 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen, activeTab, setActiveTab, onL
     { id: 'orders', label: 'Đơn hàng', icon: ShoppingCart, permission: 'view_orders' },
     { id: 'users', label: 'Người dùng', icon: Users, permission: 'view_users' },
     { id: 'categories', label: 'Danh Mục', icon: Tag, permission: 'view_categories' },
+    { id: 'coupons', label: 'Mã giảm giá', icon: Gift, permission: 'manage_coupons' },
+    { id: 'notifications', label: 'Thông báo', icon: Bell, permission: 'send_notifications' },
+    { id: 'flash-sales', label: 'Flash Sale', icon: Zap, permission: 'manage_flash_sales' },
+    { id: 'inventory', label: 'Cảnh báo kho', icon: AlertTriangle, permission: 'view_inventory_alerts' },
+    { id: 'reports', label: 'Báo cáo', icon: Download, permission: 'view_reports' },
     { id: 'roles', label: 'Quản lý Role', icon: Shield, permission: 'view_roles' },
     { id: 'user-permissions', label: 'Quyền User', icon: Users, permission: 'grant_permission' },
     { id: 'audit', label: 'Nhật ký', icon: FileText, permission: 'view_audit_logs' },

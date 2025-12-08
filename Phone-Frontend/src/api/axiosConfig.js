@@ -26,11 +26,12 @@ const processQueue = (error, token = null) => {
 // Thêm token vào header nếu có
 api.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem('accessToken');
-  console.log('🔐 Request to:', config.url, '| Token exists:', !!accessToken); // Debug
-  if (accessToken) {
+  // Only add Authorization header if token exists and is valid
+  if (accessToken && accessToken.trim() !== '' && accessToken !== 'undefined' && accessToken !== 'null') {
     config.headers.Authorization = `Bearer ${accessToken}`;
   } else {
-    console.warn('⚠️ No access token found in localStorage!'); // Debug
+    // Make sure to remove Authorization header if no valid token
+    delete config.headers.Authorization;
   }
   return config;
 });

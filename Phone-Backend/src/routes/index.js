@@ -14,6 +14,18 @@ const profileRoutes = require('./profileRoutes');
 const roleRoutes = require('./roleRoutes');
 const auditRoutes = require('./auditRoutes');
 const ocrRoutes = require('./ocrRoutes');
+const wishlistRoutes = require('./wishlistRoutes');
+const couponRoutes = require('./couponRoutes');
+const notificationRoutes = require('./notificationRoutes');
+const searchHistoryRoutes = require('./searchHistoryRoutes');
+const orderTrackingRoutes = require('./orderTrackingRoutes');
+const compareRoutes = require('./compareRoutes');
+const recentlyViewedRoutes = require('./recentlyViewedRoutes');
+const flashSaleRoutes = require('./flashSaleRoutes');
+const inventoryRoutes = require('./inventoryRoutes');
+const reportRoutes = require('./reportRoutes');
+const productImageRoutes = require('./productImageRoutes');
+const variantRoutes = require('./variantRoutes');
 
 const router = express.Router();
 
@@ -32,6 +44,18 @@ router.use('/upload', uploadRoutes);
 router.use('/roles', roleRoutes);
 router.use('/audit', auditRoutes);
 router.use('/ocr', ocrRoutes);
+router.use('/wishlist', wishlistRoutes);
+router.use('/coupons', couponRoutes);
+router.use('/notifications', notificationRoutes);
+router.use('/search-history', searchHistoryRoutes);
+router.use('/order-tracking', orderTrackingRoutes);
+router.use('/compare', compareRoutes);
+router.use('/recently-viewed', recentlyViewedRoutes);
+router.use('/flash-sales', flashSaleRoutes);
+router.use('/inventory', inventoryRoutes);
+router.use('/reports', reportRoutes);
+router.use('/products', productImageRoutes); // Product images routes
+router.use('/products', variantRoutes); // Product variants routes
 
 // Health check endpoint
 router.get('/health', (req, res) => {

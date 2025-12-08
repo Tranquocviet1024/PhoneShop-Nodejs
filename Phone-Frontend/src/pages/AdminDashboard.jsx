@@ -12,6 +12,11 @@ import {
   Tag,
   Shield,
   FileText,
+  Gift,
+  Bell,
+  Zap,
+  AlertTriangle,
+  Download,
 } from 'lucide-react';
 
 // Import components
@@ -25,6 +30,11 @@ import OrdersManagementPage from '../pages/admin/orders/OrdersManagementPage';
 import RolesManagementPage from '../pages/admin/roles/RolesManagementPage';
 import AuditLogsPage from '../pages/admin/audit/AuditLogsPage';
 import UserPermissionsPage from '../pages/admin/permissions/UserPermissionsPage';
+import CouponManagement from '../components/admin/CouponManagement';
+import NotificationManagement from '../components/admin/NotificationManagement';
+import FlashSaleManagement from '../components/admin/FlashSaleManagement';
+import InventoryAlerts from '../components/admin/InventoryAlerts';
+import ReportExport from '../components/admin/ReportExport';
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
@@ -46,6 +56,11 @@ const AdminDashboard = () => {
     { id: 'orders', label: 'Đơn hàng', icon: ShoppingCart },
     { id: 'users', label: 'Người dùng', icon: Users },
     { id: 'categories', label: 'Danh Mục', icon: Tag },
+    { id: 'coupons', label: 'Mã giảm giá', icon: Gift },
+    { id: 'flash-sale', label: 'Flash Sale', icon: Zap },
+    { id: 'inventory', label: 'Tồn kho', icon: AlertTriangle },
+    { id: 'reports', label: 'Báo cáo', icon: Download },
+    { id: 'notifications', label: 'Thông báo', icon: Bell },
     { id: 'roles', label: 'Quản lý Role', icon: Shield },
     { id: 'user-permissions', label: 'Quyền User', icon: Users },
     { id: 'audit', label: 'Nhật ký', icon: FileText },
@@ -141,6 +156,16 @@ const AdminDashboard = () => {
           {activeTab === 'users' && <UsersManagementPage />}
 
           {activeTab === 'categories' && <CategoriesPage />}
+
+          {activeTab === 'coupons' && <CouponManagement />}
+
+          {activeTab === 'flash-sales' && <FlashSaleManagement />}
+
+          {activeTab === 'inventory' && <InventoryAlerts />}
+
+          {activeTab === 'reports' && <ReportExport />}
+
+          {activeTab === 'notifications' && <NotificationManagement />}
 
           {activeTab === 'roles' && <RolesManagementPage />}
 

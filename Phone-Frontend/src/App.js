@@ -21,6 +21,10 @@ import AdminDashboard from './pages/AdminDashboard';
 import PayOSPaymentPage from './pages/PayOSPaymentPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
+import WishlistPage from './pages/WishlistPage';
+import NotificationsPage from './pages/NotificationsPage';
+import ComparePage from './pages/ComparePage';
+import FlashSalePage from './pages/FlashSalePage';
 import './index.css';
 
 function App() {
@@ -33,7 +37,7 @@ function App() {
               {/* Admin Routes (không có header/footer) */}
               <Route
                 path="/admin/dashboard"
-                element={<ProtectedRoute Component={AdminDashboard} requiredRole="ADMIN" allowStaff={true} />}
+                element={<ProtectedRoute Component={AdminDashboard} requiredRole="ADMIN" allowStaff={false} />}
               />
 
               {/* Customer Routes - với Header/Footer layout */}
@@ -209,6 +213,73 @@ function App() {
                     <Header />
                     <main className="flex-1">
                       <ProtectedRoute Component={OrdersPage} />
+                    </main>
+                    <Footer />
+                  </>
+                }
+              />
+
+              <Route
+                path="/wishlist"
+                element={
+                  <>
+                    <Header />
+                    <main className="flex-1">
+                      <ProtectedRoute Component={WishlistPage} />
+                    </main>
+                    <Footer />
+                  </>
+                }
+              />
+
+              <Route
+                path="/notifications"
+                element={
+                  <>
+                    <Header />
+                    <main className="flex-1">
+                      <ProtectedRoute Component={NotificationsPage} />
+                    </main>
+                    <Footer />
+                  </>
+                }
+              />
+
+              {/* Compare Page */}
+              <Route
+                path="/compare"
+                element={
+                  <>
+                    <Header />
+                    <main className="flex-1">
+                      <ComparePage />
+                    </main>
+                    <Footer />
+                  </>
+                }
+              />
+
+              {/* Flash Sale Pages */}
+              <Route
+                path="/flash-sale"
+                element={
+                  <>
+                    <Header />
+                    <main className="flex-1">
+                      <FlashSalePage />
+                    </main>
+                    <Footer />
+                  </>
+                }
+              />
+
+              <Route
+                path="/flash-sale/:id"
+                element={
+                  <>
+                    <Header />
+                    <main className="flex-1">
+                      <FlashSalePage />
                     </main>
                     <Footer />
                   </>

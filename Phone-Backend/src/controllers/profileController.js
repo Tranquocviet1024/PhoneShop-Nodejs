@@ -32,7 +32,7 @@ exports.getProfile = async (req, res, next) => {
 exports.updateProfile = async (req, res, next) => {
   try {
     const userId = req.userId;
-    const { fullName, phone, address } = req.body;
+    const { username, fullName, phone, address } = req.body;
 
     const user = await User.findByPk(userId);
 
@@ -41,6 +41,7 @@ exports.updateProfile = async (req, res, next) => {
     }
 
     // Update allowed fields only
+    if (username !== undefined) user.username = username;
     if (fullName !== undefined) user.fullName = fullName;
     if (phone !== undefined) user.phone = phone;
     if (address !== undefined) user.address = address;

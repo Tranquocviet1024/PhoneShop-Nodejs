@@ -43,22 +43,48 @@ app.use('/uploads', express.static('uploads', {
   etag: false
 }));
 
-// Rate limiting
+// Rate limiting - Cấu hình hợp lý cho ứng dụng web
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  message: 'Too many requests from this IP, please try again later.',
+  windowMs: 1 * 60 * 1000, // 1 phút
+  max: 200, // 200 requests mỗi phút cho mỗi IP (đủ cho việc duyệt web bình thường)
+  message: { 
+    success: false,
+    message: 'Quá nhiều yêu cầu từ IP này, vui lòng thử lại sau 1 phút.' 
+  },
+  standardHeaders: true, // Trả về rate limit info trong headers
+  legacyHeaders: false,
+  skipSuccessfulRequests: false,
+  // Không limit các request đến static files
+  skip: (req) => req.path.startsWith('/uploads'),
 });
 
+// Rate limit chặt hơn cho auth (chống brute force)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 requests per windowMs
-  message: 'Too many login attempts, please try again later.',
+  windowMs: 15 * 60 * 1000, // 15 phút
+  max: 20, // 20 lần thử đăng nhập mỗi 15 phút
+  message: { 
+    success: false,
+    message: 'Quá nhiều lần thử đăng nhập, vui lòng thử lại sau 15 phút.' 
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limit cho API nhạy cảm (tạo đơn hàng, thanh toán)
+const sensitiveApiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 phút
+  max: 30, // 30 requests mỗi phút
+  message: { 
+    success: false,
+    message: 'Quá nhiều yêu cầu, vui lòng thử lại sau.' 
+  },
 });
 
 app.use('/api/', limiter);
 app.use('/api/auth/signin', authLimiter);
 app.use('/api/auth/signup', authLimiter);
+app.use('/api/orders', sensitiveApiLimiter);
+app.use('/api/payments', sensitiveApiLimiter);
 
 // Routes
 app.use('/api', apiRoutes);

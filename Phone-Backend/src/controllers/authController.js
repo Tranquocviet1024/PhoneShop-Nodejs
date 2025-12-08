@@ -99,10 +99,8 @@ exports.signin = async (req, res, next) => {
       return next(new ApiError(401, 'Invalid email or password'));
     }
 
-    // Get user permissions
-    const permissions = typeof user.permissions === 'string'
-      ? JSON.parse(user.permissions)
-      : user.permissions;
+    // Get user permissions from Role system (NOT from user.permissions column)
+    const permissions = await permissionService.getUserPermissions(user.id);
 
     // Generate tokens with permissions
     const { accessToken, refreshToken, jti, refreshJti, expiresIn } = generateTokens(

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart, Star } from 'lucide-react';
+import { ShoppingCart, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import WishlistButton from './WishlistButton';
 
 const ProductCard = ({ product }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
   const { addToCart } = useCart();
 
   const handleAddToCart = () => {
@@ -36,15 +36,11 @@ const ProductCard = ({ product }) => {
             -{product.discount}%
           </div>
         )}
-        <button
-          onClick={() => setIsFavorite(!isFavorite)}
-          className="absolute top-3 left-3 bg-white rounded-full p-2 shadow-md hover:bg-gray-100 transition"
-        >
-          <Heart
-            size={20}
-            className={isFavorite ? 'fill-accent text-accent' : 'text-gray-400'}
-          />
-        </button>
+        <WishlistButton 
+          productId={product.id} 
+          className="absolute top-3 left-3"
+          size="sm"
+        />
       </div>
 
       {/* Product Info */}

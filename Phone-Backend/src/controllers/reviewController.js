@@ -1,9 +1,11 @@
 const Review = require('../models/Review');
 const Product = require('../models/Product');
+const Order = require('../models/Order');
 const User = require('../models/User');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const RoleEnum = require('../enums/RoleEnum');
 const PermissionEnum = require('../enums/PermissionEnum');
+const { Op } = require('sequelize');
 
 // Add review
 exports.addReview = async (req, res, next) => {
@@ -24,6 +26,27 @@ exports.addReview = async (req, res, next) => {
 
     if (!product) {
       return next(new ApiError(404, 'Product not found'));
+    }
+
+    // Check if user has purchased this product (must have completed/delivered order)
+    const userOrders = await Order.findAll({
+      where: {
+        userId: req.userId,
+        status: {
+          [Op.in]: ['delivered', 'confirmed', 'shipped'] // Allow review after order is confirmed
+        },
+        paymentStatus: 'completed'
+      }
+    });
+
+    // Check if any order contains this product
+    const hasPurchased = userOrders.some(order => {
+      const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+      return items.some(item => item.productId === parseInt(productId));
+    });
+
+    if (!hasPurchased) {
+      return next(new ApiError(403, 'You can only review products you have purchased'));
     }
 
     // Check if user already reviewed this product

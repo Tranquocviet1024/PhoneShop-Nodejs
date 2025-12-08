@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, Heart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import NotificationDropdown from './NotificationDropdown';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -50,6 +51,18 @@ const Header = () => {
 
           {/* Right Icons */}
           <div className="flex items-center gap-4">
+            {/* Wishlist */}
+            {isAuthenticated && (
+              <Link to="/wishlist" className="relative hover:text-primary transition" title="Yêu thích">
+                <Heart size={24} className="text-dark" />
+              </Link>
+            )}
+
+            {/* Notifications */}
+            {isAuthenticated && (
+              <NotificationDropdown />
+            )}
+
             {/* Cart */}
             <Link to="/cart" className="relative hover:text-primary transition">
               <ShoppingCart size={24} className="text-dark" />
@@ -107,6 +120,11 @@ const Header = () => {
             {isAuthenticated && (
               <Link to="/orders" className="text-dark hover:text-primary transition">
                 Đơn hàng
+              </Link>
+            )}
+            {isAuthenticated && (
+              <Link to="/wishlist" className="text-dark hover:text-primary transition">
+                Yêu thích
               </Link>
             )}
             {isAuthenticated && (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Plus, Trash2 } from 'lucide-react';
 import ImageUpload from '../../../components/ImageUpload';
 
 const ProductModal = ({ 
@@ -14,20 +14,30 @@ const ProductModal = ({
   isLoading 
 }) => {
   const [specs, setSpecs] = useState([]);
-  const [newSpec, setNewSpec] = useState('');
+  const [newSpecName, setNewSpecName] = useState('');
+  const [newSpecValue, setNewSpecValue] = useState('');
 
   useEffect(() => {
     if (isOpen && formData.specifications) {
-      setSpecs(formData.specifications);
+      // Handle both old string format and new object format
+      const processedSpecs = formData.specifications.map(spec => {
+        if (typeof spec === 'string') {
+          const parts = spec.split(':');
+          return { name: parts[0]?.trim() || '', value: parts.slice(1).join(':').trim() || spec };
+        }
+        return spec;
+      });
+      setSpecs(processedSpecs);
     }
   }, [isOpen, formData.specifications]);
 
   const handleAddSpec = () => {
-    if (newSpec.trim()) {
-      const updated = [...specs, newSpec];
+    if (newSpecName.trim() && newSpecValue.trim()) {
+      const updated = [...specs, { name: newSpecName.trim(), value: newSpecValue.trim() }];
       setSpecs(updated);
       onFormChange('specifications', updated);
-      setNewSpec('');
+      setNewSpecName('');
+      setNewSpecValue('');
     }
   };
 
@@ -227,47 +237,84 @@ const ProductModal = ({
           {/* Specifications */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Specifications
+              Thông số kỹ thuật (Specifications)
             </label>
-            <div className="flex gap-2 mb-2">
+            <div className="grid grid-cols-5 gap-2 mb-3">
               <input
                 type="text"
-                value={newSpec}
-                onChange={(e) => setNewSpec(e.target.value)}
+                value={newSpecName}
+                onChange={(e) => setNewSpecName(e.target.value)}
+                disabled={isLoading}
+                className="col-span-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="Tên (VD: Màn hình)"
+              />
+              <input
+                type="text"
+                value={newSpecValue}
+                onChange={(e) => setNewSpecValue(e.target.value)}
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
+                    e.preventDefault();
                     handleAddSpec();
                   }
                 }}
                 disabled={isLoading}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Add specification (e.g., Color: Red)"
+                className="col-span-2 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                placeholder="Giá trị (VD: 6.7 inch AMOLED)"
               />
               <button
+                type="button"
                 onClick={handleAddSpec}
-                disabled={isLoading || !newSpec.trim()}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400"
+                disabled={isLoading || !newSpecName.trim() || !newSpecValue.trim()}
+                className="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 flex items-center justify-center"
               >
-                Add
+                <Plus size={18} />
               </button>
             </div>
+            
+            {/* Quick add common specs */}
+            <div className="flex flex-wrap gap-1 mb-3">
+              {['Màn hình', 'Chip/CPU', 'RAM', 'Bộ nhớ', 'Camera sau', 'Camera trước', 'Pin', 'Hệ điều hành'].map(name => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => setNewSpecName(name)}
+                  className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded"
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+
             {specs.length > 0 && (
-              <div className="space-y-2">
-                {specs.map((spec, index) => (
-                  <div
-                    key={index}
-                    className="flex justify-between items-center bg-gray-50 p-2 rounded"
-                  >
-                    <span className="text-sm text-gray-700">{spec}</span>
-                    <button
-                      onClick={() => handleRemoveSpec(index)}
-                      disabled={isLoading}
-                      className="text-red-500 hover:text-red-700 text-sm"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ))}
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Thông số</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Giá trị</th>
+                      <th className="px-3 py-2 w-10"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {specs.map((spec, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-3 py-2 font-medium">{spec.name}</td>
+                        <td className="px-3 py-2 text-gray-600">{spec.value}</td>
+                        <td className="px-3 py-2">
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveSpec(index)}
+                            disabled={isLoading}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

@@ -59,9 +59,9 @@ const ProfilePage = () => {
     // Map CCCD data to profile fields
     setEditData(prev => ({
       ...prev,
+      username: cccdData.name || prev.username,
       fullName: cccdData.name || prev.fullName,
       address: cccdData.residence || prev.address,
-      // You can add more mappings as needed
     }));
     
     setShowCCCDUpload(false);
@@ -74,6 +74,7 @@ const ProfilePage = () => {
       setSuccess('');
       
       const response = await api.put('/profile', {
+        username: editData.username,
         fullName: editData.fullName,
         phone: editData.phone,
         address: editData.address
@@ -165,6 +166,21 @@ const ProfilePage = () => {
                 <Camera size={20} />
                 Tự động điền từ CCCD
               </button>
+
+              <div>
+                <label className="block text-sm font-bold text-dark mb-2">
+                  <User size={18} className="inline mr-2" />
+                  Tên Tài Khoản
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={editData.username || ''}
+                  onChange={handleEditChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-primary"
+                  placeholder="Nhập tên tài khoản"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-bold text-dark mb-2">

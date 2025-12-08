@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/', authenticateToken, requirePermission('create_order'), orderController.createOrder);
 router.get('/', authenticateToken, requirePermission('view_orders'), orderController.getUserOrders);
 router.get('/:orderId', authenticateToken, requirePermission('view_orders'), orderController.getOrderById);
-router.post('/:orderId/cancel', authenticateToken, requirePermission('cancel_order'), orderController.cancelOrder);
+router.put('/:orderId/cancel', authenticateToken, requirePermission('cancel_order'), orderController.cancelOrder);
 
 // Admin routes
 router.get('/admin/all', authenticateToken, requirePermission('view_orders'), orderController.getAllOrders);
