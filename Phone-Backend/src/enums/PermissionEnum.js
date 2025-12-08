@@ -71,6 +71,60 @@ const PermissionEnum = {
   // Admin Dashboard
   VIEW_DASHBOARD: 'view_dashboard',
   VIEW_ADMIN_STATS: 'view_admin_stats',
+
+  // Wishlist permissions
+  MANAGE_WISHLIST: 'manage_wishlist',
+  VIEW_WISHLIST: 'view_wishlist',
+
+  // Coupon permissions
+  MANAGE_COUPONS: 'manage_coupons',
+  CREATE_COUPON: 'create_coupon',
+  UPDATE_COUPON: 'update_coupon',
+  DELETE_COUPON: 'delete_coupon',
+  VIEW_COUPONS: 'view_coupons',
+  APPLY_COUPON: 'apply_coupon',
+
+  // Notification permissions
+  SEND_NOTIFICATIONS: 'send_notifications',
+  VIEW_NOTIFICATIONS: 'view_notifications',
+  MANAGE_NOTIFICATIONS: 'manage_notifications',
+
+  // Search History permissions
+  VIEW_SEARCH_HISTORY: 'view_search_history',
+  MANAGE_SEARCH_HISTORY: 'manage_search_history',
+
+  // Order Tracking permissions
+  VIEW_ORDER_TRACKING: 'view_order_tracking',
+  UPDATE_ORDER_TRACKING: 'update_order_tracking',
+
+  // Flash Sale permissions
+  VIEW_FLASH_SALES: 'view_flash_sales',
+  MANAGE_FLASH_SALES: 'manage_flash_sales',
+  CREATE_FLASH_SALE: 'create_flash_sale',
+  UPDATE_FLASH_SALE: 'update_flash_sale',
+  DELETE_FLASH_SALE: 'delete_flash_sale',
+
+  // Inventory Alert permissions
+  VIEW_INVENTORY_ALERTS: 'view_inventory_alerts',
+  MANAGE_INVENTORY_ALERTS: 'manage_inventory_alerts',
+  RESOLVE_INVENTORY_ALERT: 'resolve_inventory_alert',
+
+  // Report permissions
+  VIEW_REPORTS: 'view_reports',
+  EXPORT_REPORTS: 'export_reports',
+
+  // Product Image permissions
+  MANAGE_PRODUCT_IMAGES: 'manage_product_images',
+  
+  // Product Variant permissions
+  VIEW_PRODUCT_VARIANTS: 'view_product_variants',
+  MANAGE_PRODUCT_VARIANTS: 'manage_product_variants',
+
+  // Recently Viewed permissions
+  VIEW_RECENTLY_VIEWED: 'view_recently_viewed',
+
+  // Compare permissions
+  COMPARE_PRODUCTS: 'compare_products',
 };
 
 // Make it also usable as array for validation
@@ -90,6 +144,7 @@ const userPermissions = [
   // Order
   PermissionEnum.CREATE_ORDER,
   PermissionEnum.VIEW_ORDERS,
+  PermissionEnum.CANCEL_ORDER, // User can cancel their own orders
   
   // Profile
   PermissionEnum.VIEW_PROFILE,
@@ -103,6 +158,35 @@ const userPermissions = [
   // Cart
   PermissionEnum.MANAGE_CART,
   PermissionEnum.VIEW_CART,
+
+  // Wishlist
+  PermissionEnum.MANAGE_WISHLIST,
+  PermissionEnum.VIEW_WISHLIST,
+
+  // Coupon
+  PermissionEnum.VIEW_COUPONS,
+  PermissionEnum.APPLY_COUPON,
+
+  // Notification
+  PermissionEnum.VIEW_NOTIFICATIONS,
+
+  // Search History
+  PermissionEnum.VIEW_SEARCH_HISTORY,
+
+  // Order Tracking
+  PermissionEnum.VIEW_ORDER_TRACKING,
+
+  // Flash Sale (view only for users)
+  PermissionEnum.VIEW_FLASH_SALES,
+
+  // Product Variants (view only)
+  PermissionEnum.VIEW_PRODUCT_VARIANTS,
+
+  // Recently Viewed
+  PermissionEnum.VIEW_RECENTLY_VIEWED,
+
+  // Compare Products
+  PermissionEnum.COMPARE_PRODUCTS,
 ];
 
 PermissionEnum.defaultByRole = {
@@ -143,6 +227,40 @@ PermissionEnum.defaultByRole = {
     // View
     PermissionEnum.VIEW_USERS,
     PermissionEnum.VIEW_DASHBOARD,
+
+    // Order Tracking - Staff can update tracking
+    PermissionEnum.VIEW_ORDER_TRACKING,
+    PermissionEnum.UPDATE_ORDER_TRACKING,
+
+    // Notifications - Staff can send
+    PermissionEnum.SEND_NOTIFICATIONS,
+    PermissionEnum.VIEW_NOTIFICATIONS,
+
+    // Flash Sale - Staff can view and manage
+    PermissionEnum.VIEW_FLASH_SALES,
+    PermissionEnum.MANAGE_FLASH_SALES,
+    PermissionEnum.CREATE_FLASH_SALE,
+    PermissionEnum.UPDATE_FLASH_SALE,
+
+    // Inventory Alerts - Staff can view and resolve
+    PermissionEnum.VIEW_INVENTORY_ALERTS,
+    PermissionEnum.RESOLVE_INVENTORY_ALERT,
+
+    // Reports - Staff can view
+    PermissionEnum.VIEW_REPORTS,
+
+    // Product Images - Staff can manage
+    PermissionEnum.MANAGE_PRODUCT_IMAGES,
+
+    // Product Variants - Staff can manage
+    PermissionEnum.VIEW_PRODUCT_VARIANTS,
+    PermissionEnum.MANAGE_PRODUCT_VARIANTS,
+
+    // Coupons - Staff can view and manage
+    PermissionEnum.VIEW_COUPONS,
+    PermissionEnum.MANAGE_COUPONS,
+    PermissionEnum.CREATE_COUPON,
+    PermissionEnum.UPDATE_COUPON,
   ],
   
   admin: [

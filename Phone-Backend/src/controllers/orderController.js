@@ -26,17 +26,36 @@ exports.createOrder = async (req, res, next) => {
       return next(new ApiError(400, 'Payment method is required'));
     }
 
-    if (!totalAmount) {
-      return next(new ApiError(400, 'Total amount is required'));
+    // Validate payment method
+    const validPaymentMethods = ['credit-card', 'bank-transfer', 'e-wallet', 'cod'];
+    if (!validPaymentMethods.includes(paymentMethod)) {
+      return next(new ApiError(400, `Invalid payment method. Must be one of: ${validPaymentMethods.join(', ')}`));
     }
 
-    // Verify all products exist (NO stock check here - will check at payment)
+    // Verify all products exist and calculate server-side total (prevent price manipulation)
+    let serverCalculatedTotal = 0;
+    const validatedProducts = [];
+    
     for (const item of products) {
+      if (!item.productId || !item.quantity || item.quantity < 1) {
+        return next(new ApiError(400, 'Each product must have productId and quantity >= 1'));
+      }
+      
       const product = await Product.findByPk(item.productId);
       
       if (!product) {
         return next(new ApiError(400, `Product ${item.productId} not found`));
       }
+
+      // Calculate total from server-side prices
+      serverCalculatedTotal += parseFloat(product.price) * item.quantity;
+      
+      validatedProducts.push({
+        productId: item.productId,
+        quantity: item.quantity,
+        price: parseFloat(product.price), // Use server price
+        name: product.name
+      });
 
       // Optional: Show warning if stock is low (but still allow order creation)
       if (product.stock < item.quantity) {
@@ -48,17 +67,27 @@ exports.createOrder = async (req, res, next) => {
       }
     }
 
+    // Validate client total matches server calculation (allow small tolerance for rounding)
+    const tolerance = 1; // 1 VND tolerance
+    if (totalAmount && Math.abs(serverCalculatedTotal - totalAmount) > tolerance) {
+      console.warn(`Price mismatch: Client sent ${totalAmount}, Server calculated ${serverCalculatedTotal}`);
+      // Use server-calculated total for security
+    }
+
     // Create order with orderId (NO stock deduction yet)
     const orderId = `ORD-${Date.now()}`;
+    const finalShippingCost = shippingCost || 0;
+    const finalTax = tax || 0;
+    
     const order = await Order.create({
       userId,
-      items: JSON.stringify(products),
+      items: JSON.stringify(validatedProducts),
       shippingInfo: JSON.stringify(shippingAddress),
       paymentMethod,
-      totalPrice: totalAmount,
-      shippingCost: shippingCost || 0,
-      tax: tax || 0,
-      finalTotal: totalAmount + (shippingCost || 0) + (tax || 0),
+      totalPrice: serverCalculatedTotal, // Use server-calculated total
+      shippingCost: finalShippingCost,
+      tax: finalTax,
+      finalTotal: serverCalculatedTotal + finalShippingCost + finalTax,
       status: 'pending',
       paymentStatus: 'pending',
     });
@@ -195,13 +224,16 @@ exports.cancelOrder = async (req, res, next) => {
       return next(new ApiError(400, 'Order cannot be cancelled in current status'));
     }
 
-    // Restore product stock
-    const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
-    for (const item of items) {
-      const product = await Product.findByPk(item.productId);
-      if (product) {
-        product.stock += item.quantity;
-        await product.save();
+    // Only restore stock if payment was completed (stock was deducted)
+    // Stock is deducted only when payment is confirmed/completed
+    if (order.paymentStatus === 'completed') {
+      const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+      for (const item of items) {
+        const product = await Product.findByPk(item.productId);
+        if (product) {
+          product.stock += item.quantity;
+          await product.save();
+        }
       }
     }
 
@@ -245,7 +277,37 @@ exports.updateOrderStatus = async (req, res, next) => {
       return next(new ApiError(404, 'Order not found'));
     }
 
+    // Define valid status transitions
+    const validStatusTransitions = {
+      'pending': ['confirmed', 'cancelled'],
+      'confirmed': ['shipped', 'cancelled'],
+      'shipped': ['delivered', 'cancelled'],
+      'delivered': [], // Final state - cannot change
+      'cancelled': [] // Final state - cannot change
+    };
+
+    // Validate status transition
     if (status && ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].includes(status)) {
+      const currentStatus = order.status;
+      const allowedTransitions = validStatusTransitions[currentStatus] || [];
+      
+      if (currentStatus === status) {
+        // Same status, no change needed
+      } else if (!allowedTransitions.includes(status)) {
+        return next(new ApiError(400, `Cannot change order status from '${currentStatus}' to '${status}'. Allowed: ${allowedTransitions.join(', ') || 'none'}`));
+      }
+      
+      // If cancelling a paid order, restore stock
+      if (status === 'cancelled' && order.paymentStatus === 'completed') {
+        const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+        for (const item of items) {
+          await Product.increment('stock', {
+            by: item.quantity,
+            where: { id: item.productId }
+          });
+        }
+      }
+      
       order.status = status;
     }
 

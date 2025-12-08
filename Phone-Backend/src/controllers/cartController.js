@@ -13,22 +13,43 @@ exports.saveCart = async (req, res, next) => {
       return next(new ApiError(400, 'Items array is required'));
     }
 
-    // Calculate total price
+    // Validate items and recalculate prices from database (prevent price manipulation)
     let totalPrice = 0;
+    const validatedItems = [];
+    
     for (const item of items) {
-      totalPrice += item.price * item.quantity;
+      if (!item.productId || !item.quantity || item.quantity < 1) {
+        continue; // Skip invalid items
+      }
+      
+      const product = await Product.findByPk(item.productId);
+      if (!product) {
+        continue; // Skip non-existent products
+      }
+      
+      // Use server-side price, not client price
+      const serverPrice = parseFloat(product.price);
+      totalPrice += serverPrice * item.quantity;
+      
+      validatedItems.push({
+        productId: item.productId,
+        quantity: Math.min(item.quantity, product.stock), // Cap quantity at available stock
+        price: serverPrice,
+        name: product.name, // Include product name for convenience
+        image: product.image
+      });
     }
 
     let cart = await Cart.findOne({ where: { userId: req.userId } });
 
     if (cart) {
-      cart.items = JSON.stringify(items);
+      cart.items = JSON.stringify(validatedItems);
       cart.totalPrice = totalPrice;
       await cart.save();
     } else {
       cart = await Cart.create({
         userId: req.userId,
-        items: JSON.stringify(items),
+        items: JSON.stringify(validatedItems),
         totalPrice,
       });
     }
@@ -104,12 +125,19 @@ exports.addToCart = async (req, res, next) => {
     const existingItem = items.find((item) => item.productId === productId);
 
     if (existingItem) {
-      existingItem.quantity += quantity;
+      // Check if total quantity exceeds stock
+      const newQuantity = existingItem.quantity + quantity;
+      if (newQuantity > product.stock) {
+        return next(new ApiError(400, `Cannot add more items. Available stock: ${product.stock}, Current in cart: ${existingItem.quantity}`));
+      }
+      existingItem.quantity = newQuantity;
+      // Update price to latest (in case price changed)
+      existingItem.price = parseFloat(product.price);
     } else {
       items.push({
         productId,
         quantity,
-        price: product.price,
+        price: parseFloat(product.price),
       });
     }
 

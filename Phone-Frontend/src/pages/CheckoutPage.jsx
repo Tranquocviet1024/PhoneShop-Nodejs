@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { ChevronLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { ChevronLeft, CheckCircle, AlertCircle, Tag, X } from 'lucide-react';
 import OrderService from '../services/OrderService';
+import CouponService from '../services/CouponService';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -26,6 +27,13 @@ const CheckoutPage = () => {
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [error, setError] = useState('');
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState('');
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   if (cart.length === 0 && !orderPlaced) {
     return (
@@ -50,7 +58,40 @@ const CheckoutPage = () => {
   const totalPrice = getTotalPrice();
   const shippingCost = 0;
   const tax = Math.round(totalPrice * 0.08);
-  const finalTotal = totalPrice + shippingCost + tax;
+  const finalTotal = totalPrice + shippingCost + tax - discountAmount;
+
+  // Handle coupon apply
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError('Vui lòng nhập mã giảm giá');
+      return;
+    }
+
+    setCouponLoading(true);
+    setCouponError('');
+
+    try {
+      const response = await CouponService.validateCoupon(couponCode, totalPrice, cart);
+      
+      if (response.success && response.data) {
+        setAppliedCoupon(response.data.coupon);
+        setDiscountAmount(response.data.discountAmount || 0);
+        setCouponCode('');
+      } else {
+        setCouponError(response.message || 'Mã giảm giá không hợp lệ');
+      }
+    } catch (err) {
+      setCouponError(err.message || 'Không thể áp dụng mã giảm giá');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  // Remove applied coupon
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setDiscountAmount(0);
+  };
 
   const handleShippingChange = (e) => {
     const { name, value } = e.target;
@@ -94,6 +135,8 @@ const CheckoutPage = () => {
         totalAmount: totalPrice, // Giá sản phẩm (không bao gồm tax + shipping)
         shippingCost: shippingCost,
         tax: tax,
+        couponCode: appliedCoupon?.code || null,
+        discountAmount: discountAmount,
       };
 
       console.log('📦 Sending order:', orderData);
@@ -465,6 +508,53 @@ const CheckoutPage = () => {
                 ))}
               </div>
 
+              {/* Coupon Input */}
+              <div className="mb-4 pb-4 border-b">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Tag size={16} className="inline mr-1" />
+                  Mã giảm giá
+                </label>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-3">
+                    <div>
+                      <p className="font-semibold text-green-700">{appliedCoupon.code}</p>
+                      <p className="text-sm text-green-600">
+                        Giảm {new Intl.NumberFormat('vi-VN', {
+                          style: 'currency',
+                          currency: 'VND',
+                        }).format(discountAmount)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleRemoveCoupon}
+                      className="text-gray-400 hover:text-red-500"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Nhập mã giảm giá"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                    />
+                    <button
+                      onClick={handleApplyCoupon}
+                      disabled={couponLoading}
+                      className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-accent transition disabled:opacity-50 text-sm font-medium"
+                    >
+                      {couponLoading ? '...' : 'Áp dụng'}
+                    </button>
+                  </div>
+                )}
+                {couponError && (
+                  <p className="text-red-500 text-sm mt-2">{couponError}</p>
+                )}
+              </div>
+
               <div className="space-y-2 mb-4 pb-4 border-b">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Tạm tính:</span>
@@ -488,6 +578,17 @@ const CheckoutPage = () => {
                     }).format(tax)}
                   </span>
                 </div>
+                {discountAmount > 0 && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Giảm giá:</span>
+                    <span>
+                      -{new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND',
+                      }).format(discountAmount)}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-between mb-4">

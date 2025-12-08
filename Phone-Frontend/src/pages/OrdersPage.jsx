@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Package, Truck, Clock, DollarSign, RefreshCcw } from 'lucide-react';
+import { Package, Truck, Clock, DollarSign, RefreshCcw, XCircle } from 'lucide-react';
 import OrderService from '../services/OrderService';
+import OrderTracking from '../components/OrderTracking';
 
 const statusColors = {
   pending: 'bg-yellow-100 text-yellow-800',
@@ -27,6 +28,9 @@ const OrdersPage = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [cancellingOrder, setCancellingOrder] = useState(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState(null);
 
   const loadOrders = async () => {
     try {
@@ -46,6 +50,44 @@ const OrdersPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Xử lý hủy đơn hàng
+  const handleCancelOrder = async () => {
+    if (!orderToCancel) return;
+    
+    try {
+      setCancellingOrder(orderToCancel.orderId);
+      setError('');
+      
+      const response = await OrderService.cancelOrder(orderToCancel.orderId);
+      
+      if (response.success) {
+        // Reload danh sách đơn hàng
+        await loadOrders();
+        setShowCancelModal(false);
+        setOrderToCancel(null);
+      } else {
+        setError(response.message || 'Không thể hủy đơn hàng');
+      }
+    } catch (err) {
+      setError(err?.message || 'Có lỗi xảy ra khi hủy đơn hàng');
+    } finally {
+      setCancellingOrder(null);
+    }
+  };
+
+  // Mở modal xác nhận hủy
+  const openCancelModal = (order, e) => {
+    e.stopPropagation(); // Ngăn click vào card
+    setOrderToCancel(order);
+    setShowCancelModal(true);
+  };
+
+  // Kiểm tra đơn hàng có thể hủy không
+  const canCancelOrder = (order) => {
+    // Chỉ cho phép hủy đơn hàng pending hoặc confirmed
+    return ['pending', 'confirmed'].includes(order.status?.toLowerCase());
   };
 
   useEffect(() => {
@@ -159,6 +201,18 @@ const OrdersPage = () => {
                       {order.shippingInfo?.city || '—'}
                     </div>
                   </div>
+
+                  {/* Nút hủy đơn hàng */}
+                  {canCancelOrder(order) && (
+                    <button
+                      onClick={(e) => openCancelModal(order, e)}
+                      disabled={cancellingOrder === order.orderId}
+                      className="mt-3 w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg hover:bg-red-100 transition disabled:opacity-50"
+                    >
+                      <XCircle size={16} />
+                      {cancellingOrder === order.orderId ? 'Đang hủy...' : 'Hủy đơn hàng'}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -207,9 +261,80 @@ const OrdersPage = () => {
                       <span>{formatCurrency(selectedOrder.finalTotal)}</span>
                     </div>
                   </section>
+
+                  {/* Nút hủy đơn hàng trong chi tiết */}
+                  {canCancelOrder(selectedOrder) && (
+                    <section className="border-t pt-4">
+                      <button
+                        onClick={(e) => openCancelModal(selectedOrder, e)}
+                        disabled={cancellingOrder === selectedOrder.orderId}
+                        className="w-full flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                      >
+                        <XCircle size={18} />
+                        {cancellingOrder === selectedOrder.orderId ? 'Đang hủy đơn hàng...' : 'Hủy đơn hàng này'}
+                      </button>
+                      <p className="text-xs text-gray-500 text-center mt-2">
+                        Bạn chỉ có thể hủy đơn hàng khi đơn hàng đang ở trạng thái "Chờ xử lý" hoặc "Đã xác nhận"
+                      </p>
+                    </section>
+                  )}
+
+                  {/* Order Tracking */}
+                  <section className="border-t pt-4">
+                    <OrderTracking orderId={selectedOrder.orderId} />
+                  </section>
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Modal xác nhận hủy đơn hàng */}
+        {showCancelModal && orderToCancel && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <XCircle className="text-red-600" size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Xác nhận hủy đơn hàng</h3>
+                  <p className="text-sm text-gray-500">Mã đơn: {orderToCancel.orderId}</p>
+                </div>
+              </div>
+              
+              <p className="text-gray-600 mb-6">
+                Bạn có chắc chắn muốn hủy đơn hàng này không? Hành động này không thể hoàn tác.
+              </p>
+
+              <div className="bg-gray-50 rounded-lg p-3 mb-6">
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold">Tổng tiền:</span> {formatCurrency(orderToCancel.finalTotal)}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-semibold">Số sản phẩm:</span> {orderToCancel.items?.length || 0}
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowCancelModal(false);
+                    setOrderToCancel(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Không, giữ lại
+                </button>
+                <button
+                  onClick={handleCancelOrder}
+                  disabled={cancellingOrder}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                >
+                  {cancellingOrder ? 'Đang hủy...' : 'Có, hủy đơn'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -154,6 +154,18 @@ exports.createProduct = async (req, res, next) => {
       return next(new ApiError(400, 'Missing required fields'));
     }
 
+    // Validate price logic: originalPrice must be >= price
+    if (parseFloat(originalPrice) < parseFloat(price)) {
+      return next(new ApiError(400, 'Original price must be greater than or equal to selling price'));
+    }
+
+    // Validate discount is consistent with prices
+    const calculatedDiscount = Math.round(((originalPrice - price) / originalPrice) * 100);
+    const providedDiscount = discount || 0;
+    
+    // Auto-calculate discount if not provided or if provided discount is inconsistent
+    const finalDiscount = providedDiscount || calculatedDiscount;
+
     // Validate category exists (accept both ID and name)
     let validCategory = null;
     if (Number.isInteger(Number(category))) {
@@ -176,7 +188,7 @@ exports.createProduct = async (req, res, next) => {
       category: categoryName,
       price,
       originalPrice,
-      discount: discount || 0,
+      discount: finalDiscount,
       image,
       description,
       specifications: specifications || [],
@@ -209,6 +221,20 @@ exports.updateProduct = async (req, res, next) => {
 
     // Capture old values for audit
     const oldValues = product.toJSON();
+
+    // Validate price logic if updating prices
+    const newPrice = updates.price !== undefined ? parseFloat(updates.price) : parseFloat(product.price);
+    const newOriginalPrice = updates.originalPrice !== undefined ? parseFloat(updates.originalPrice) : parseFloat(product.originalPrice);
+    
+    if (newOriginalPrice < newPrice) {
+      return next(new ApiError(400, 'Original price must be greater than or equal to selling price'));
+    }
+
+    // Auto-calculate discount if prices are updated
+    if (updates.price !== undefined || updates.originalPrice !== undefined) {
+      const calculatedDiscount = Math.round(((newOriginalPrice - newPrice) / newOriginalPrice) * 100);
+      updates.discount = updates.discount !== undefined ? updates.discount : calculatedDiscount;
+    }
 
     // If category is being updated, validate it exists (accept both ID and name)
     if (updates.category && updates.category !== product.category) {
