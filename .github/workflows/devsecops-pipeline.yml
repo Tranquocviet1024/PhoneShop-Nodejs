@@ -15,7 +15,7 @@ permissions:
   actions: read
 
 env:
-  NODE_VERSION: '18.x'
+  NODE_VERSION: '20.x'
   BACKEND_DIR: './Phone-Backend'
   FRONTEND_DIR: './Phone-Frontend'
 
