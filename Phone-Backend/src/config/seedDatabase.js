@@ -25,10 +25,19 @@ const seedDatabase = async () => {
       console.log('✅ Admin user already exists');
       console.log(`📋 Admin ID: ${adminExists.id}, Email: ${adminExists.email}, Role: ${adminExists.role}`);
       
-      // DELETE and recreate to ensure fresh password
-      console.log('🗑️ Deleting old admin to recreate...');
-      await adminExists.destroy();
-      console.log('✅ Old admin deleted');
+      // Update existing admin instead of deleting
+      if (adminExists.role !== RoleEnum.ADMIN) {
+        console.log(`⚠️  Admin role is "${adminExists.role}", should be "${RoleEnum.ADMIN}"`);
+        adminExists.role = RoleEnum.ADMIN;
+      }
+      
+      // Force update password
+      adminExists.passwordHash = defaultPassword; // beforeUpdate hook will hash it
+      adminExists.isActive = true;
+      await adminExists.save();
+      
+      console.log(`✅ Admin updated - Role: ${RoleEnum.ADMIN}, Password: ${defaultPassword}`);
+      return adminExists;
     }
 
     // Create admin user with ADMIN role and all permissions
