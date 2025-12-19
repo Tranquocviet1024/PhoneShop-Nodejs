@@ -11,71 +11,40 @@ const bcrypt = require('bcryptjs');
  */
 const seedDatabase = async () => {
   try {
+    console.log('🔄 Starting database seeding...');
     const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'admin';
+    console.log(`🔑 Default password: ${defaultPassword}`);
     
     // Check if admin user already exists
     const adminExists = await User.findOne({
       where: { username: 'admin' }
     });
+    console.log(`👤 Admin exists: ${!!adminExists}`);
 
     if (adminExists) {
       console.log('✅ Admin user already exists');
       console.log(`📋 Admin ID: ${adminExists.id}, Email: ${adminExists.email}, Role: ${adminExists.role}`);
       
-      // FORCE: Reset password to ensure we can login
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(defaultPassword, salt);
-      adminExists.passwordHash = hashedPassword;
-      adminExists.role = RoleEnum.ADMIN;
-      adminExists.isActive = true;
-      await adminExists.save();
-      console.log(`🔐 Admin password reset to: ${defaultPassword}`);
-      console.log(`👤 Admin role set to: ${RoleEnum.ADMIN}`);
-      
-      // Update admin permissions to ensure all new permissions are included
-      const allPermissions = PermissionEnum.defaultByRole[RoleEnum.ADMIN];
-      const currentPermissions = typeof adminExists.permissions === 'string' 
-        ? JSON.parse(adminExists.permissions) 
-        : adminExists.permissions || [];
-      
-      // Check if permissions need to be updated (e.g., new permissions added)
-      if (JSON.stringify(currentPermissions) !== JSON.stringify(allPermissions)) {
-        await adminExists.update({ permissions: allPermissions });
-        console.log('✅ Admin permissions updated with new permissions');
-      }
-
-      // IMPORTANT: Ensure admin has UserRole assignment for RBAC system
-      const adminRole = await Role.findOne({ where: { name: RoleEnum.ADMIN } });
-      if (adminRole) {
-        const userRoleExists = await UserRole.findOne({
-          where: { userId: adminExists.id, roleId: adminRole.id }
-        });
-        
-        if (!userRoleExists) {
-          await UserRole.create({
-            userId: adminExists.id,
-            roleId: adminRole.id,
-            additionalPermissions: [],
-            deniedPermissions: []
-          });
-          console.log('✅ Admin UserRole assignment created');
-        }
-      }
-      
-      return;
+      // DELETE and recreate to ensure fresh password
+      console.log('🗑️ Deleting old admin to recreate...');
+      await adminExists.destroy();
+      console.log('✅ Old admin deleted');
     }
 
     // Create admin user with ADMIN role and all permissions
-    // SECURITY: Default credentials for initial setup only - MUST be changed on first login
+    console.log('🔨 Creating new admin user...');
+    
+    // Pass plain password - User.beforeCreate hook will hash it
     const adminUser = await User.create({
       username: 'admin',
       email: 'admin@admin.com',
-      passwordHash: process.env.ADMIN_DEFAULT_PASSWORD || 'admin', // Will be hashed by User.beforeCreate hook
+      passwordHash: defaultPassword, // Hook will hash this
       fullName: 'Admin User',
       role: RoleEnum.ADMIN,
       permissions: PermissionEnum.defaultByRole[RoleEnum.ADMIN],
       isActive: true,
     });
+    console.log(`✅ Admin created with password: ${defaultPassword}`);
 
     // Create UserRole assignment for RBAC system
     const adminRole = await Role.findOne({ where: { name: RoleEnum.ADMIN } });
