@@ -13,12 +13,11 @@ Phone-Frontend/.env
 
 # Sensitive files - NEVER COMMIT
 RAILWAY_ENV_VALUES.md
-DEPLOYMENT_GUIDE.md
 **/secrets.json
 **/*credentials*
-**/*_ENV*.md
-**/*_SECRET*.md
-**/*_KEY*.md
+**/DEPLOYMENT_GUIDE*.md
+**/deploy-guide*.md
+**/*-config.md
 
 # Build outputs
 build/
