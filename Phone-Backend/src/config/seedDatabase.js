@@ -23,12 +23,12 @@ const seedDatabase = async () => {
       console.log(`📋 Admin ID: ${adminExists.id}, Email: ${adminExists.email}, Role: ${adminExists.role}`);
       
       // FORCE: Reset password to ensure we can login
-      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-      await adminExists.update({ 
-        passwordHash: hashedPassword,
-        role: RoleEnum.ADMIN,
-        isActive: true
-      });
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(defaultPassword, salt);
+      adminExists.passwordHash = hashedPassword;
+      adminExists.role = RoleEnum.ADMIN;
+      adminExists.isActive = true;
+      await adminExists.save();
       console.log(`🔐 Admin password reset to: ${defaultPassword}`);
       console.log(`👤 Admin role set to: ${RoleEnum.ADMIN}`);
       
