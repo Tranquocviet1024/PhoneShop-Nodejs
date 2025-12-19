@@ -18,6 +18,12 @@ const seedDatabase = async () => {
     if (adminExists) {
       console.log('✅ Admin user already exists');
       
+      // Update admin role if it's not ADMIN
+      if (adminExists.role !== RoleEnum.ADMIN) {
+        await adminExists.update({ role: RoleEnum.ADMIN });
+        console.log('✅ Admin role updated to ADMIN');
+      }
+      
       // Update admin permissions to ensure all new permissions are included
       const allPermissions = PermissionEnum.defaultByRole[RoleEnum.ADMIN];
       const currentPermissions = typeof adminExists.permissions === 'string' 
