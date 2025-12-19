@@ -133,9 +133,14 @@ const connectDB = async () => {
     Product.hasMany(ProductVariant, { foreignKey: 'productId', as: 'variants' });
     ProductVariant.belongsTo(Product, { foreignKey: 'productId' });
 
-    // Sync database models - use force: false to avoid recreating tables
-    // NOTE: alter: true can cause "too many keys" error, use with caution
-    await sequelize.sync({ alter: false });
+    // Sync database models
+    // In production: sync({ force: false }) - only create if not exists
+    // alter: true can cause issues with constraints
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    // For first deployment, tables need to be created
+    // After first successful deployment, this will just verify tables exist
+    await sequelize.sync({ force: false, alter: false });
     console.log('✅ Database synchronized');
     return sequelize;
   } catch (error) {

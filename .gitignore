@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.production
+Phone-Backend/.env
+Phone-Frontend/.env
+
+# Sensitive files - NEVER COMMIT
+RAILWAY_ENV_VALUES.md
+**/secrets.json
+**/*credentials*
+
+# Build outputs
+build/
+dist/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test coverage
+coverage/
+
+# Uploads (production)
+Phone-Backend/uploads/*
+!Phone-Backend/uploads/.gitkeep
+
+# Vercel
+.vercel
+
+# Railway
+.railway

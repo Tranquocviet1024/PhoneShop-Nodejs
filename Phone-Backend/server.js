@@ -18,19 +18,35 @@ const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
 
-// Connect to database
-connectDB();
+// Database will be connected in the startup function
+let dbConnected = false;
 
 // Middleware
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" } // Allow cross-origin for static files
 }));
+
+// CORS configuration for production
+const allowedOrigins = process.env.CORS_ORIGIN 
+  ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim())
+  : ['http://localhost:3001'];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3001',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      console.warn(`⚠️ CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 }));
 
 // Body parser
@@ -89,6 +105,16 @@ app.use('/api/payments', sensitiveApiLimiter);
 // Routes
 app.use('/api', apiRoutes);
 
+// Health check endpoint for monitoring
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime()
+  });
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
@@ -103,19 +129,38 @@ app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
-app.listen(PORT, async () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🗄️  Database: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
-  console.log(`🌐 CORS Origin: ${process.env.CORS_ORIGIN || 'http://localhost:3001'}`);
-
-  // Run database seeding
+// Startup function - ensures proper initialization order
+const startServer = async () => {
   try {
-    await seedDatabase();
+    // 1. Connect to database and sync models (creates tables if not exist)
+    console.log('🔄 Connecting to database...');
+    await connectDB();
+    
+    // 2. Start HTTP server
+    app.listen(PORT, HOST, async () => {
+      console.log(`✅ Server running on http://${HOST}:${PORT}`);
+      console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🗄️  Database: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`);
+      console.log(`🌐 CORS Origins: ${process.env.CORS_ORIGIN || 'http://localhost:3001'}`);
+
+      // 3. Run database seeding (after tables are created)
+      try {
+        await seedDatabase();
+        console.log('✅ Database seeding completed');
+      } catch (error) {
+        console.error('❌ Seeding failed:', error.message);
+        // Don't exit - server can still run without seed data
+      }
+    });
   } catch (error) {
-    console.error('❌ Seeding failed:', error);
+    console.error('❌ Failed to start server:', error.message);
+    process.exit(1);
   }
-});
+};
+
+// Start the application
+startServer();
 
 module.exports = app;

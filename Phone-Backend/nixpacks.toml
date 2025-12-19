@@ -1,0 +1,12 @@
+# Cấu hình Nixpacks cho Railway
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["echo 'Build complete'"]
+
+[start]
+cmd = "npm start"
