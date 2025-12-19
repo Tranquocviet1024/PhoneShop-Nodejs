@@ -3,6 +3,7 @@ const Role = require('../models/Role');
 const UserRole = require('../models/UserRole');
 const RoleEnum = require('../enums/RoleEnum');
 const PermissionEnum = require('../enums/PermissionEnum');
+const bcrypt = require('bcryptjs');
 
 /**
  * Database Seeding - Initialize default admin user
@@ -10,6 +11,8 @@ const PermissionEnum = require('../enums/PermissionEnum');
  */
 const seedDatabase = async () => {
   try {
+    const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'admin';
+    
     // Check if admin user already exists
     const adminExists = await User.findOne({
       where: { username: 'admin' }
@@ -17,12 +20,17 @@ const seedDatabase = async () => {
 
     if (adminExists) {
       console.log('✅ Admin user already exists');
+      console.log(`📋 Admin ID: ${adminExists.id}, Email: ${adminExists.email}, Role: ${adminExists.role}`);
       
-      // Update admin role if it's not ADMIN
-      if (adminExists.role !== RoleEnum.ADMIN) {
-        await adminExists.update({ role: RoleEnum.ADMIN });
-        console.log('✅ Admin role updated to ADMIN');
-      }
+      // FORCE: Reset password to ensure we can login
+      const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+      await adminExists.update({ 
+        passwordHash: hashedPassword,
+        role: RoleEnum.ADMIN,
+        isActive: true
+      });
+      console.log(`🔐 Admin password reset to: ${defaultPassword}`);
+      console.log(`👤 Admin role set to: ${RoleEnum.ADMIN}`);
       
       // Update admin permissions to ensure all new permissions are included
       const allPermissions = PermissionEnum.defaultByRole[RoleEnum.ADMIN];
