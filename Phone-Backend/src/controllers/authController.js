@@ -22,7 +22,14 @@ const { sendPasswordResetEmail } = require('../config/email');
 // Sign Up
 exports.signup = async (req, res, next) => {
   try {
-    const { username, email, passwordHash, fullName } = req.body;
+    const { username, email, password, passwordHash, fullName } = req.body;
+    
+    // Accept both 'password' and 'passwordHash' for backward compatibility
+    const userPassword = password || passwordHash;
+    
+    if (!userPassword) {
+      return next(new ApiError(400, 'Password is required'));
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({
@@ -38,11 +45,11 @@ exports.signup = async (req, res, next) => {
       return next(new ApiError(409, 'Username already taken'));
     }
 
-    // Create new user
+    // Create new user - beforeCreate hook will hash the password
     const user = await User.create({
       username,
       email,
-      passwordHash,
+      passwordHash: userPassword, // Will be hashed by beforeCreate hook
       fullName,
       role: RoleEnum.USER,
       permissions: PermissionEnum.defaultByRole[RoleEnum.USER],
