@@ -15,7 +15,30 @@ const seedDatabase = async () => {
     const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'admin';
     console.log(`🔑 Default password: ${defaultPassword}`);
     
-    // Check if admin user already exists
+    // STEP 1: Seed Roles first
+    console.log('📋 Seeding roles...');
+    const [adminRole] = await Role.findOrCreate({
+      where: { name: RoleEnum.ADMIN },
+      defaults: {
+        name: RoleEnum.ADMIN,
+        permissions: PermissionEnum.defaultByRole[RoleEnum.ADMIN],
+        description: 'Administrator with full permissions',
+        isActive: true
+      }
+    });
+    
+    const [userRole] = await Role.findOrCreate({
+      where: { name: RoleEnum.USER },
+      defaults: {
+        name: RoleEnum.USER,
+        permissions: PermissionEnum.defaultByRole[RoleEnum.USER] || [],
+        description: 'Standard user',
+        isActive: true
+      }
+    });
+    console.log('✅ Roles seeded');
+    
+    // STEP 2: Check if admin user already exists
     const adminExists = await User.findOne({
       where: { username: 'admin' }
     });
@@ -37,6 +60,19 @@ const seedDatabase = async () => {
       await adminExists.save();
       
       console.log(`✅ Admin updated - Role: ${RoleEnum.ADMIN}, Password: ${defaultPassword}`);
+      
+      // STEP 3: Ensure UserRole record exists
+      await UserRole.findOrCreate({
+        where: { userId: adminExists.id, roleId: adminRole.id },
+        defaults: {
+          userId: adminExists.id,
+          roleId: adminRole.id,
+          additionalPermissions: [],
+          deniedPermissions: []
+        }
+      });
+      console.log('✅ Admin UserRole ensured');
+      
       return adminExists;
     }
 
@@ -56,16 +92,16 @@ const seedDatabase = async () => {
     console.log(`✅ Admin created with password: ${defaultPassword}`);
 
     // Create UserRole assignment for RBAC system
-    const adminRole = await Role.findOne({ where: { name: RoleEnum.ADMIN } });
-    if (adminRole) {
-      await UserRole.create({
+    await UserRole.findOrCreate({
+      where: { userId: adminUser.id, roleId: adminRole.id },
+      defaults: {
         userId: adminUser.id,
         roleId: adminRole.id,
         additionalPermissions: [],
         deniedPermissions: []
-      });
-      console.log('✅ Admin UserRole assignment created');
-    }
+      }
+    });
+    console.log('✅ Admin UserRole assignment created');
 
     console.log('⚠️  Admin user created with username: admin and password: admin');
     console.log('🔐 Please change the password after first login!');
