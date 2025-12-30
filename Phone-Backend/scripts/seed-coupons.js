@@ -3,7 +3,7 @@
  * Run with: node scripts/seed-coupons.js
  */
 
-const { sequelize } = require('../src/config/database');
+require('../src/config/database');
 const Coupon = require('../src/models/Coupon');
 
 const sampleCoupons = [

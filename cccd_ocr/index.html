@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trích xuất thông tin CCCD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f4f7f6;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            width: 90%;
+            max-width: 600px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        input[type="file"] {
+            padding: 0.5rem;
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button {
+            padding: 0.75rem;
+            font-size: 1rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 1.5rem;
+        }
+        #results h2 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 1rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap; /* Giúp xuống dòng */
+            word-wrap: break-word; /* Bẻ gãy từ nếu quá dài */
+        }
+        .loading {
+            text-align: center;
+            font-style: italic;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OCR Căn cước công dân (CCCD)</h1>
+        
+        <form id="uploadForm">
+            <label for="imageInput">Chọn ảnh CCCD (mặt trước):</label>
+            <input type="file" id="imageInput" name="cccdImage" accept="image/png, image/jpeg, image/webp" required>
+            <button type="submit" id="submitButton">Trích xuất thông tin</button>
+        </form>
+
+        <div id="results">
+            </div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const imageInput = document.getElementById('imageInput');
+        const submitButton = document.getElementById('submitButton');
+        const resultsDiv = document.getElementById('results');
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Ngăn form gửi theo cách truyền thống
+
+            if (!imageInput.files || imageInput.files.length === 0) {
+                alert('Vui lòng chọn một file ảnh.');
+                return;
+            }
+
+            // Hiển thị trạng thái đang tải và vô hiệu hóa nút
+            resultsDiv.innerHTML = '<p class="loading">Đang xử lý, vui lòng đợi...</p>';
+            submitButton.disabled = true;
+            submitButton.textContent = 'Đang xử lý...';
+
+            // Tạo FormData để gửi file
+            const formData = new FormData();
+            formData.append('cccdImage', imageInput.files[0]);
+
+            try {
+                // Gọi API backend /upload
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    // Nếu server trả về lỗi (ví dụ: 500)
+                    throw new Error(data.error || 'Đã xảy ra lỗi không xác định.');
+                }
+
+                // Hiển thị kết quả JSON
+                resultsDiv.innerHTML = '<h2>Kết quả trích xuất:</h2>';
+                // Dùng JSON.stringify để định dạng JSON đẹp
+                resultsDiv.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+
+            } catch (error) {
+                console.error('Lỗi:', error);
+                resultsDiv.innerHTML = `<p style="color: red;"><strong>Lỗi:</strong> ${error.message}</p>`;
+            } finally {
+                // Kích hoạt lại nút sau khi hoàn tất
+                submitButton.disabled = false;
+                submitButton.textContent = 'Trích xuất thông tin';
+            }
+        });
+    </script>
+</body>
+</html>

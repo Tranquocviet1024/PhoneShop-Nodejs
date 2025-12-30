@@ -3,7 +3,6 @@ const Role = require('../models/Role');
 const UserRole = require('../models/UserRole');
 const RoleEnum = require('../enums/RoleEnum');
 const PermissionEnum = require('../enums/PermissionEnum');
-const bcrypt = require('bcryptjs');
 
 /**
  * Database Seeding - Initialize default admin user
@@ -13,7 +12,7 @@ const seedDatabase = async () => {
   try {
     console.log('🔄 Starting database seeding...');
     const defaultPassword = process.env.ADMIN_DEFAULT_PASSWORD || 'admin';
-    console.log(`🔑 Default password: ${defaultPassword}`);
+    console.log('🔑 Default password: [REDACTED]');
     
     // STEP 1: Seed Roles first
     console.log('📋 Seeding roles...');
@@ -27,7 +26,7 @@ const seedDatabase = async () => {
       }
     });
     
-    const [userRole] = await Role.findOrCreate({
+    await Role.findOrCreate({
       where: { name: RoleEnum.USER },
       defaults: {
         name: RoleEnum.USER,
@@ -59,7 +58,7 @@ const seedDatabase = async () => {
       adminExists.isActive = true;
       await adminExists.save();
       
-      console.log(`✅ Admin updated - Role: ${RoleEnum.ADMIN}, Password: ${defaultPassword}`);
+      console.log(`✅ Admin updated - Role: ${RoleEnum.ADMIN}`);
       
       // STEP 3: Ensure UserRole record exists
       await UserRole.findOrCreate({
@@ -89,7 +88,7 @@ const seedDatabase = async () => {
       permissions: PermissionEnum.defaultByRole[RoleEnum.ADMIN],
       isActive: true,
     });
-    console.log(`✅ Admin created with password: ${defaultPassword}`);
+    console.log('✅ Admin created successfully');
 
     // Create UserRole assignment for RBAC system
     await UserRole.findOrCreate({

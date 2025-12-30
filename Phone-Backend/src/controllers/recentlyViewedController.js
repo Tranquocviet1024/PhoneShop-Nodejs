@@ -1,7 +1,6 @@
 const RecentlyViewed = require('../models/RecentlyViewed');
 const Product = require('../models/Product');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
-const { Op } = require('sequelize');
 
 // Thêm sản phẩm vào lịch sử xem
 exports.addToRecentlyViewed = async (req, res, next) => {

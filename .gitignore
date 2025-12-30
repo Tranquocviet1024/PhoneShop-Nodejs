@@ -51,3 +51,12 @@ Phone-Backend/uploads/*
 
 # Railway
 .railway
+
+# Documentation (internal)
+docs/
+**/DEPLOYMENT*.md
+**/FIX_*.md
+**/*GUIDE*.md
+
+# Logs and debug files
+**/.github/java-upgrade/

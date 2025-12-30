@@ -18,9 +18,6 @@ const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
 
-// Database will be connected in the startup function
-let dbConnected = false;
-
 // Trust proxy - Required for Railway/Vercel/Cloudflare (behind reverse proxy)
 app.set('trust proxy', 1);
 
@@ -41,7 +38,7 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     // Allow all Vercel preview URLs
-    if (origin && origin.includes('.vercel.app')) {
+    if (origin.includes('.vercel.app')) {
       return callback(null, true);
     }
     

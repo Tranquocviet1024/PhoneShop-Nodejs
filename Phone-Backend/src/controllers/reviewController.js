@@ -4,7 +4,6 @@ const Order = require('../models/Order');
 const User = require('../models/User');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const RoleEnum = require('../enums/RoleEnum');
-const PermissionEnum = require('../enums/PermissionEnum');
 const { Op } = require('sequelize');
 
 // Add review

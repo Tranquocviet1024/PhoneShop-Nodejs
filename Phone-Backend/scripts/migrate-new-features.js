@@ -9,7 +9,7 @@
  * Run this script with: node scripts/migrate-new-features.js
  */
 
-const { sequelize } = require('../src/config/database');
+require('../src/config/database');
 
 // Import all models
 const Wishlist = require('../src/models/Wishlist');

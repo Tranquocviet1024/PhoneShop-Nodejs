@@ -1,5 +1,5 @@
 const SearchHistory = require('../models/SearchHistory');
-const { ApiResponse, ApiError } = require('../utils/apiResponse');
+const { ApiResponse } = require('../utils/apiResponse');
 const { Op, fn, col, literal } = require('sequelize');
 
 // Lưu lịch sử tìm kiếm

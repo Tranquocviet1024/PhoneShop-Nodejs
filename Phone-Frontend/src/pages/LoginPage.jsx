@@ -125,26 +125,6 @@ const LoginPage = () => {
           </button>
         </form>
 
-        {/* Divider */}
-        <div className="relative mb-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-600">Hoặc</span>
-          </div>
-        </div>
-
-        {/* Social Login */}
-        <div className="space-y-3 mb-6">
-          <button className="w-full border-2 border-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-50 transition">
-            Đăng nhập với Google
-          </button>
-          <button className="w-full border-2 border-gray-300 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-50 transition">
-            Đăng nhập với Facebook
-          </button>
-        </div>
-
         {/* Sign Up Link */}
         <p className="text-center text-gray-600">
           Chưa có tài khoản?{' '}

@@ -1,7 +1,6 @@
 const ProductVariant = require('../models/ProductVariant');
 const Product = require('../models/Product');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
-const { Op } = require('sequelize');
 
 // Lấy tất cả variants của sản phẩm
 exports.getProductVariants = async (req, res, next) => {

@@ -23,7 +23,7 @@ const CheckoutPage = () => {
     city: '',
   });
 
-  const [paymentMethod, setPaymentMethod] = useState('credit-card');
+  const [paymentMethod, setPaymentMethod] = useState('cod');
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState('');
   const [error, setError] = useState('');
@@ -388,13 +388,8 @@ const CheckoutPage = () => {
 
                 <div className="space-y-4 mb-6">
                   {[
-                    {
-                      id: 'credit-card',
-                      label: '💳 Thẻ tín dụng/Ghi nợ',
-                    },
-                    { id: 'bank-transfer', label: '🏦 Chuyển khoản ngân hàng' },
-                    { id: 'e-wallet', label: '📱 Ví điện tử (PayOS)' },
-                    { id: 'cod', label: '💵 Thanh toán khi nhận hàng' },
+                    { id: 'cod', label: '💵 Thanh toán khi nhận hàng (COD)' },
+                    { id: 'e-wallet', label: '📱 Thanh toán online (PayOS - QR Code)' },
                   ].map((method) => (
                     <label
                       key={method.id}
@@ -456,10 +451,8 @@ const CheckoutPage = () => {
                   </p>
                   <p className="text-sm text-blue-800">
                     💳 Thanh toán: 
-                    {paymentMethod === 'credit-card' && ' Thẻ tín dụng/Ghi nợ'}
-                    {paymentMethod === 'bank-transfer' && ' Chuyển khoản ngân hàng'}
-                    {paymentMethod === 'e-wallet' && ' Ví điện tử (Momo, Zalopay)'}
-                    {paymentMethod === 'cod' && ' Thanh toán khi nhận hàng'}
+                    {paymentMethod === 'cod' && ' Thanh toán khi nhận hàng (COD)'}
+                    {paymentMethod === 'e-wallet' && ' Thanh toán online (PayOS - QR Code)'}
                   </p>
                 </div>
 
