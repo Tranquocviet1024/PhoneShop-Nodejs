@@ -210,7 +210,13 @@ const ProductsManagementPage = () => {
         discount: formData.discount ? parseFloat(formData.discount) : 0,
         image: formData.image,
         description: formData.description,
-        specifications: formData.specifications.filter(s => s.trim()),
+        specifications: formData.specifications.filter(s => {
+          // Handle both string format (legacy) and object format {name, value}
+          if (typeof s === 'string') {
+            return s.trim() !== '';
+          }
+          return s && s.name && s.name.trim() !== '' && s.value && s.value.trim() !== '';
+        }),
         stock: formData.stock ? parseInt(formData.stock) : 0,
       };
 

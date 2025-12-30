@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Clock, X } from 'lucide-react';
 import RecentlyViewedService from '../services/RecentlyViewedService';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../utils/imageUtils';
 
 const RecentlyViewed = ({ limit = 6, showTitle = true }) => {
   const [products, setProducts] = useState([]);
@@ -97,7 +98,7 @@ const RecentlyViewed = ({ limit = 6, showTitle = true }) => {
               
               <Link to={`/products/${product.id}`}>
                 <img
-                  src={product.image}
+                  src={getImageUrl(product.image)}
                   alt={product.name}
                   className="w-full h-24 object-cover rounded-lg mb-2"
                 />

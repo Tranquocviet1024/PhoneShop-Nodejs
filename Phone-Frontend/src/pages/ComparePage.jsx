@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Scale, X, Plus, ArrowLeft } from 'lucide-react';
 import ProductCompare from '../components/ProductCompare';
 import ProductService from '../services/ProductService';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ComparePage = () => {
   const [searchParams] = useSearchParams();
@@ -147,7 +148,7 @@ const ComparePage = () => {
                   {product ? (
                     <>
                       <img
-                        src={product.image}
+                        src={getImageUrl(product.image)}
                         alt={product.name}
                         className="w-full h-32 object-contain mb-2"
                       />
@@ -209,7 +210,7 @@ const ComparePage = () => {
                     }}
                   >
                     <img
-                      src={product.image}
+                      src={getImageUrl(product.image)}
                       alt={product.name}
                       className="w-12 h-12 object-cover rounded"
                     />
@@ -251,7 +252,7 @@ const ComparePage = () => {
                 >
                   <Link to={`/products/${product.id}`}>
                     <img
-                      src={product.image}
+                      src={getImageUrl(product.image)}
                       alt={product.name}
                       className="w-full h-28 object-contain mb-2"
                     />

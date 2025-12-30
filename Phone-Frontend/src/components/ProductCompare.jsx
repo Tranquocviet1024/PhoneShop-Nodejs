@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import CompareService from '../services/CompareService';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProductCompare = ({ productIds = [], onClose, onRemoveProduct }) => {
   const [comparison, setComparison] = useState(null);
@@ -86,7 +87,7 @@ const ProductCompare = ({ productIds = [], onClose, onRemoveProduct }) => {
                 </button>
               )}
               <img
-                src={product.image}
+                src={getImageUrl(product.image)}
                 alt={product.name}
                 className="w-32 h-32 object-cover mx-auto rounded-lg"
               />

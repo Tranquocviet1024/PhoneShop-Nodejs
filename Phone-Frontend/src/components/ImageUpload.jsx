@@ -1,13 +1,22 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, X } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ImageUpload = ({ onImageUrlChange, initialImageUrl = '', disabled = false }) => {
-  const [preview, setPreview] = useState(initialImageUrl || '');
+  const [preview, setPreview] = useState(initialImageUrl ? getImageUrl(initialImageUrl) : '');
   const [imageUrl, setImageUrl] = useState(initialImageUrl || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef(null);
+
+  // Update preview when initialImageUrl changes (e.g., when editing a product)
+  useEffect(() => {
+    if (initialImageUrl) {
+      setPreview(getImageUrl(initialImageUrl));
+      setImageUrl(initialImageUrl);
+    }
+  }, [initialImageUrl]);
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];

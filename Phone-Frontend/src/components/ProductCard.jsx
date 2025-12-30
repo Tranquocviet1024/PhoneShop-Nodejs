@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import WishlistButton from './WishlistButton';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
@@ -15,21 +16,24 @@ const ProductCard = ({ product }) => {
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden group">
       {/* Product Image */}
       <div className="relative overflow-hidden bg-gray-100 h-48 flex items-center justify-center">
-        {typeof product.image === 'string' && product.image.match(/^https?:/) ? (
+        {product.image ? (
           <img
-            src={product.image}
+            src={getImageUrl(product.image)}
             alt={product.name}
             className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
             onError={(e) => {
               e.target.style.display = 'none';
-              e.target.nextElementSibling.style.display = 'block';
+              if (e.target.nextElementSibling) {
+                e.target.nextElementSibling.style.display = 'flex';
+              }
             }}
           />
         ) : null}
-        <div className="text-6xl text-center">
-          {typeof product.image === 'string' && !product.image.match(/^https?:/)
-            ? product.image
-            : '📱'}
+        <div 
+          className="text-6xl text-center items-center justify-center"
+          style={{ display: product.image ? 'none' : 'flex' }}
+        >
+          📱
         </div>
         {product.discount && (
           <div className="absolute top-3 right-3 bg-accent text-white px-3 py-1 rounded-full text-sm font-bold">

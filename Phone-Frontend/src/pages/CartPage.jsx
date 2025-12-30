@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingCart, ChevronLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { getImageUrl } from '../utils/imageUtils';
 
 const CartPage = () => {
   const { cart, removeFromCart, updateQuantity, clearCart, getTotalPrice } =
@@ -70,10 +71,7 @@ const CartPage = () => {
                     {/* Image */}
                     <div className="md:col-span-1">
                       <img
-                        src={
-                          item.image ||
-                          'https://via.placeholder.com/80?text=Product'
-                        }
+                        src={getImageUrl(item.image) || 'https://via.placeholder.com/80?text=Product'}
                         alt={item.name}
                         className="w-20 h-20 object-cover rounded-lg"
                       />

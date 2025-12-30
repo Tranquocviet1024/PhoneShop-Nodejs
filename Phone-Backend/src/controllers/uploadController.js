@@ -20,8 +20,17 @@ exports.uploadImage = async (req, res, next) => {
       return next(new ApiError(400, 'Invalid file upload'));
     }
 
-    // Generate file URL
-    const fileUrl = `http://localhost:3000/uploads/${req.file.filename}`;
+    // Generate file URL - use BASE_URL env var for production, or construct from request
+    let baseUrl = process.env.BASE_URL;
+    if (!baseUrl) {
+      // Fallback: construct from request (works for local development)
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['x-forwarded-host'] || req.get('host');
+      baseUrl = `${protocol}://${host}`;
+    }
+    // Remove trailing slash if present
+    baseUrl = baseUrl.replace(/\/$/, '');
+    const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
     res.status(200).json(
       new ApiResponse(200, {

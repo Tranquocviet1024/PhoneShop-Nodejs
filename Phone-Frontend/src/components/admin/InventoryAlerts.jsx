@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, Package, CheckCircle, RefreshCw } from 'lucide-react';
 import InventoryService from '../../services/InventoryService';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const InventoryAlerts = () => {
   const [alerts, setAlerts] = useState([]);
@@ -201,7 +202,7 @@ const InventoryAlerts = () => {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <img
-                        src={alert.product?.image}
+                        src={getImageUrl(alert.product?.image)}
                         alt={alert.product?.name}
                         className="w-12 h-12 object-cover rounded"
                       />

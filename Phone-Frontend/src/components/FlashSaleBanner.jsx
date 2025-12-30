@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Zap, Clock, ChevronRight } from 'lucide-react';
 import FlashSaleService from '../services/FlashSaleService';
+import { getImageUrl } from '../utils/imageUtils';
 
 const FlashSaleBanner = () => {
   const [flashSales, setFlashSales] = useState([]);
@@ -138,7 +139,7 @@ const FlashSaleBanner = () => {
                 </div>
 
                 <img
-                  src={item.product?.image}
+                  src={getImageUrl(item.product?.image)}
                   alt={item.product?.name}
                   className="w-full h-24 object-cover rounded mb-2"
                 />

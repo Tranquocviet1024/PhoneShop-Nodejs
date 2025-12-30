@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
+import { getImageUrl } from '../../../utils/imageUtils';
 
 const ProductTable = ({ products, onEditClick, onDeleteClick, loading }) => {
   if (loading) {
@@ -38,7 +39,7 @@ const ProductTable = ({ products, onEditClick, onDeleteClick, loading }) => {
               <td className="px-6 py-4 text-sm text-gray-900">{product.id}</td>
               <td className="px-6 py-4 text-sm">
                 <img
-                  src={product.image}
+                  src={getImageUrl(product.image)}
                   alt={product.name}
                   className="h-10 w-10 object-cover rounded bg-gray-100"
                   onError={(e) => {

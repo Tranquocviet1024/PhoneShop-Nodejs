@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import WishlistService from '../services/WishlistService';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { getImageUrl } from '../utils/imageUtils';
 
 const WishlistPage = () => {
   const [wishlist, setWishlist] = useState([]);
@@ -150,7 +151,7 @@ const WishlistPage = () => {
                   <div className="relative">
                     <Link to={`/products/${product.id}`}>
                       <img
-                        src={product.image || product.imageUrl || '/placeholder-phone.png'}
+                        src={getImageUrl(product.image || product.imageUrl) || '/placeholder-phone.png'}
                         alt={product.name}
                         className="w-full h-48 object-cover group-hover:scale-105 transition duration-300"
                       />

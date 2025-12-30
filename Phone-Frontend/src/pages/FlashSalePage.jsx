@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Zap, Clock, ShoppingCart } from 'lucide-react';
 import FlashSaleService from '../services/FlashSaleService';
 import { useCart } from '../context/CartContext';
+import { getImageUrl } from '../utils/imageUtils';
 
 const FlashSalePage = () => {
   const { id } = useParams();
@@ -187,7 +188,7 @@ const FlashSalePage = () => {
                 </div>
                 <Link to={`/products/${item.product?.id || item.productId}`}>
                   <img
-                    src={item.product?.image}
+                    src={getImageUrl(item.product?.image)}
                     alt={item.product?.name}
                     className="w-full h-48 object-contain p-4 group-hover:scale-105 transition"
                   />

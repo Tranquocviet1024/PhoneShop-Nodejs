@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import FlashSaleService from '../../services/FlashSaleService';
 import ProductService from '../../services/ProductService';
+import { getImageUrl } from '../../utils/imageUtils';
 
 const FlashSaleManagement = () => {
   const [flashSales, setFlashSales] = useState([]);
@@ -327,7 +328,7 @@ const FlashSaleManagement = () => {
                           <td className="px-3 py-2">
                             <div className="flex items-center gap-2">
                               <img
-                                src={item.product?.image}
+                                src={getImageUrl(item.product?.image)}
                                 alt={item.product?.name}
                                 className="w-10 h-10 object-cover rounded"
                               />
@@ -514,7 +515,7 @@ const FlashSaleManagement = () => {
                         onClick={() => selectProduct(product)}
                         className="flex items-center gap-2 p-2 hover:bg-gray-50 cursor-pointer"
                       >
-                        <img src={product.image} alt="" className="w-10 h-10 object-cover rounded" />
+                        <img src={getImageUrl(product.image)} alt="" className="w-10 h-10 object-cover rounded" />
                         <div>
                           <p className="text-sm font-medium">{product.name}</p>
                           <p className="text-xs text-red-600">{formatPrice(product.price)}</p>

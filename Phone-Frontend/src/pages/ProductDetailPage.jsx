@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import WishlistService from '../services/WishlistService';
 import RecentlyViewedService from '../services/RecentlyViewedService';
 import api from '../api/axiosConfig';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -162,7 +163,7 @@ const ProductDetailPage = () => {
           {/* Product Image */}
           <div className="flex items-center justify-center bg-gray-100 rounded-lg h-96">
             <img
-              src={product.image}
+              src={getImageUrl(product.image)}
               alt={product.name}
               className="w-full h-full object-cover rounded-lg"
             />

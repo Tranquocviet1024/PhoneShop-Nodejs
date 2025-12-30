@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ZoomIn, X } from 'lucide-react';
+import { getImageUrl } from '../utils/imageUtils';
 
 const ProductGallery = ({ images = [], mainImage, productName }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -10,12 +11,13 @@ const ProductGallery = ({ images = [], mainImage, productName }) => {
     // Combine main image with additional images
     const imageList = [];
     if (mainImage) {
-      imageList.push({ imageUrl: mainImage, isPrimary: true });
+      imageList.push({ imageUrl: getImageUrl(mainImage), isPrimary: true });
     }
     if (images && images.length > 0) {
       images.forEach(img => {
-        if (img.imageUrl !== mainImage) {
-          imageList.push(img);
+        const imgUrl = getImageUrl(img.imageUrl);
+        if (imgUrl !== getImageUrl(mainImage)) {
+          imageList.push({ ...img, imageUrl: imgUrl });
         }
       });
     }
