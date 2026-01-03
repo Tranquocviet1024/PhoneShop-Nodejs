@@ -108,56 +108,129 @@ const sendPasswordResetEmail = async (to, resetToken, userName) => {
 
   const htmlContent = `
     <!DOCTYPE html>
-    <html>
+    <html lang="vi">
     <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #4F46E5; color: white; padding: 20px; text-align: center; }
-        .content { background-color: #f9fafb; padding: 30px; }
-        .button { 
-          display: inline-block; 
-          padding: 12px 24px; 
-          background-color: #4F46E5; 
-          color: white; 
-          text-decoration: none; 
-          border-radius: 6px;
-          margin: 20px 0;
-        }
-        .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
-        .warning { background-color: #FEF3C7; padding: 15px; border-left: 4px solid #F59E0B; margin: 20px 0; }
-      </style>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Đặt lại mật khẩu</title>
     </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>PhoneShop</h1>
-        </div>
-        <div class="content">
-          <h2>Xin chào ${userName || 'bạn'},</h2>
-          <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.</p>
-          <p>Nhấn vào nút bên dưới để đặt lại mật khẩu:</p>
-          <div style="text-align: center;">
-            <a href="${resetUrl}" class="button">Đặt lại mật khẩu</a>
-          </div>
-          <p>Hoặc copy link sau vào trình duyệt:</p>
-          <p style="word-break: break-all; background-color: #e5e7eb; padding: 10px; border-radius: 4px;">
-            ${resetUrl}
-          </p>
-          <div class="warning">
-            <strong>⚠️ Lưu ý:</strong>
-            <ul>
-              <li>Link này sẽ hết hạn sau <strong>1 giờ</strong></li>
-              <li>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này</li>
-              <li>Không chia sẻ link này với bất kỳ ai</li>
-            </ul>
-          </div>
-        </div>
-        <div class="footer">
-          <p>© ${new Date().getFullYear()} PhoneShop. All rights reserved.</p>
-          <p>Email này được gửi tự động, vui lòng không trả lời.</p>
-        </div>
-      </div>
+    <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f4f8;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f0f4f8;">
+        <tr>
+          <td style="padding: 40px 20px;">
+            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600" style="margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);">
+              
+              <!-- Header với gradient -->
+              <tr>
+                <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="text-align: center;">
+                        <div style="width: 70px; height: 70px; background-color: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 15px; line-height: 70px;">
+                          <span style="font-size: 32px;">📱</span>
+                        </div>
+                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 1px;">PhoneShop</h1>
+                        <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0; font-size: 14px;">Cửa hàng điện thoại uy tín</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              
+              <!-- Icon khóa -->
+              <tr>
+                <td style="text-align: center; padding-top: 30px;">
+                  <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; margin: 0 auto; line-height: 80px; box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);">
+                    <span style="font-size: 36px;">🔐</span>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Nội dung chính -->
+              <tr>
+                <td style="padding: 30px 40px;">
+                  <h2 style="color: #1a202c; margin: 0 0 20px; font-size: 24px; text-align: center; font-weight: 600;">Đặt lại mật khẩu</h2>
+                  
+                  <p style="color: #4a5568; font-size: 16px; line-height: 1.7; margin: 0 0 15px;">
+                    Xin chào <strong style="color: #667eea;">${userName || 'bạn'}</strong>,
+                  </p>
+                  
+                  <p style="color: #4a5568; font-size: 16px; line-height: 1.7; margin: 0 0 25px;">
+                    Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại PhoneShop. Nhấn vào nút bên dưới để tạo mật khẩu mới:
+                  </p>
+                  
+                  <!-- Nút CTA -->
+                  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                    <tr>
+                      <td style="text-align: center; padding: 10px 0 30px;">
+                        <a href="${resetUrl}" style="display: inline-block; padding: 16px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; border-radius: 50px; font-size: 16px; font-weight: 600; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4); transition: all 0.3s;">
+                          🔑 Đặt lại mật khẩu
+                        </a>
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <!-- Link backup -->
+                  <div style="background-color: #f7fafc; border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+                    <p style="color: #718096; font-size: 13px; margin: 0 0 10px;">
+                      <strong>🔗 Hoặc copy link sau vào trình duyệt:</strong>
+                    </p>
+                    <p style="color: #667eea; font-size: 12px; word-break: break-all; margin: 0; background-color: #edf2f7; padding: 12px; border-radius: 8px; font-family: monospace;">
+                      ${resetUrl}
+                    </p>
+                  </div>
+                  
+                  <!-- Cảnh báo -->
+                  <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 20px; border-left: 4px solid #f59e0b;">
+                    <p style="color: #92400e; font-size: 14px; font-weight: 600; margin: 0 0 12px;">
+                      ⚠️ Lưu ý quan trọng:
+                    </p>
+                    <ul style="color: #92400e; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.8;">
+                      <li>Link này sẽ <strong>hết hạn sau 1 giờ</strong></li>
+                      <li>Nếu bạn không yêu cầu, hãy bỏ qua email này</li>
+                      <li>Không chia sẻ link này với bất kỳ ai</li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              
+              <!-- Phân cách -->
+              <tr>
+                <td style="padding: 0 40px;">
+                  <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 0;">
+                </td>
+              </tr>
+              
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 30px 40px; text-align: center;">
+                  <p style="color: #a0aec0; font-size: 13px; margin: 0 0 15px;">
+                    Cảm ơn bạn đã tin tưởng PhoneShop!
+                  </p>
+                  <div style="margin-bottom: 15px;">
+                    <a href="#" style="display: inline-block; margin: 0 8px; color: #667eea; text-decoration: none;">
+                      <span style="font-size: 20px;">🌐</span>
+                    </a>
+                    <a href="#" style="display: inline-block; margin: 0 8px; color: #667eea; text-decoration: none;">
+                      <span style="font-size: 20px;">📘</span>
+                    </a>
+                    <a href="#" style="display: inline-block; margin: 0 8px; color: #667eea; text-decoration: none;">
+                      <span style="font-size: 20px;">📸</span>
+                    </a>
+                  </div>
+                  <p style="color: #cbd5e0; font-size: 12px; margin: 0;">
+                    © ${new Date().getFullYear()} PhoneShop. All rights reserved.
+                  </p>
+                  <p style="color: #cbd5e0; font-size: 11px; margin: 8px 0 0;">
+                    Email này được gửi tự động, vui lòng không trả lời.
+                  </p>
+                </td>
+              </tr>
+              
+            </table>
+          </td>
+        </tr>
+      </table>
     </body>
     </html>
   `;
