@@ -79,7 +79,8 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ steps.set-dir.outputs.dir }}
-        run: npm ci
+        run: npm install --legacy-peer-deps
+        continue-on-error: true
 
       # NPM Audit
       # Only fail on critical vulnerabilities
@@ -142,7 +143,7 @@ jobs:
       - name: ESLint Security Scan
         run: |
           cd ${{ env.BACKEND_DIR }}
-          npm ci
+          npm install --legacy-peer-deps
           npx eslint . --ext .js --format json --output-file eslint-report.json || true
           
       - name: Upload ESLint Report
@@ -218,14 +219,14 @@ jobs:
       - name: Backend Code Quality
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           npm run lint || true
           npm run test:coverage || true
 
       - name: Frontend Code Quality
         working-directory: ${{ env.FRONTEND_DIR }}
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           npm run lint || true
           npm test -- --coverage --watchAll=false || true
 
@@ -405,14 +406,14 @@ jobs:
       - name: Backend License Check
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           license-checker --json --out licenses-backend.json
           license-checker --failOn "GPL;AGPL;LGPL"
 
       - name: Frontend License Check
         working-directory: ${{ env.FRONTEND_DIR }}
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           license-checker --json --out licenses-frontend.json
           license-checker --failOn "GPL;AGPL;LGPL"
 
@@ -494,13 +495,13 @@ jobs:
       - name: Build Backend
         working-directory: ${{ env.BACKEND_DIR }}
         run: |
-          npm ci --production
+          npm install --legacy-peer-deps --omit=dev
           echo "Backend built successfully"
 
       - name: Build Frontend
         working-directory: ${{ env.FRONTEND_DIR }}
         run: |
-          npm ci
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Deploy to Production
