@@ -1,24 +1,77 @@
 const nodemailer = require('nodemailer');
 
-// Email transporter configuration
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: process.env.EMAIL_PORT || 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// Determine email provider based on environment
+const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || 'smtp'; // 'smtp', 'resend', 'sendgrid'
+
+// Create transporter based on provider
+let transporter;
+
+if (EMAIL_PROVIDER === 'resend') {
+  // Resend uses SMTP but with their own servers (works on cloud platforms)
+  transporter = nodemailer.createTransport({
+    host: 'smtp.resend.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: 'resend',
+      pass: process.env.RESEND_API_KEY,
+    },
+  });
+} else if (EMAIL_PROVIDER === 'sendgrid') {
+  // SendGrid SMTP (works on cloud platforms)
+  transporter = nodemailer.createTransport({
+    host: 'smtp.sendgrid.net',
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'apikey',
+      pass: process.env.SENDGRID_API_KEY,
+    },
+  });
+} else if (EMAIL_PROVIDER === 'brevo') {
+  // Brevo (Sendinblue) SMTP
+  transporter = nodemailer.createTransport({
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.BREVO_USER,
+      pass: process.env.BREVO_API_KEY,
+    },
+  });
+} else {
+  // Default: Gmail SMTP (works locally, may not work on some cloud platforms)
+  transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+    port: parseInt(process.env.EMAIL_PORT) || 587,
+    secure: process.env.EMAIL_SECURE === 'true', // true for 465, false for other ports
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+    // Increase timeout for cloud environments
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  });
+}
 
 // Verify transporter configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ Email configuration error:', error.message);
-  } else {
-    console.log('✅ Email server is ready to send messages');
+const verifyTransporter = async () => {
+  try {
+    await transporter.verify();
+    console.log(`✅ Email server is ready (Provider: ${EMAIL_PROVIDER})`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Email configuration error (Provider: ${EMAIL_PROVIDER}):`, error.message);
+    return false;
   }
-});
+};
+
+// Only verify in non-production or if explicitly enabled
+if (process.env.NODE_ENV !== 'production' || process.env.VERIFY_EMAIL_ON_START === 'true') {
+  verifyTransporter();
+}
 
 /**
  * Send password reset email
@@ -29,8 +82,18 @@ transporter.verify((error, success) => {
 const sendPasswordResetEmail = async (to, resetToken, userName) => {
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/reset-password?token=${resetToken}`;
   
+  // Determine sender email based on provider
+  let fromEmail = process.env.EMAIL_USER;
+  if (EMAIL_PROVIDER === 'resend') {
+    fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+  } else if (EMAIL_PROVIDER === 'sendgrid') {
+    fromEmail = process.env.SENDGRID_FROM_EMAIL || process.env.EMAIL_USER;
+  } else if (EMAIL_PROVIDER === 'brevo') {
+    fromEmail = process.env.BREVO_FROM_EMAIL || process.env.EMAIL_USER;
+  }
+
   const mailOptions = {
-    from: `"PhoneShop Support" <${process.env.EMAIL_USER}>`,
+    from: `"PhoneShop Support" <${fromEmail}>`,
     to: to,
     subject: 'Đặt lại mật khẩu - PhoneShop',
     html: `
@@ -95,7 +158,7 @@ const sendPasswordResetEmail = async (to, resetToken, userName) => {
     console.log('✅ Password reset email sent:', info.messageId);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error('❌ Error sending password reset email:', error);
+    console.error(`❌ Error sending password reset email (Provider: ${EMAIL_PROVIDER}):`, error);
     throw error;
   }
 };
@@ -103,4 +166,6 @@ const sendPasswordResetEmail = async (to, resetToken, userName) => {
 module.exports = {
   transporter,
   sendPasswordResetEmail,
+  verifyTransporter,
+  EMAIL_PROVIDER,
 };
