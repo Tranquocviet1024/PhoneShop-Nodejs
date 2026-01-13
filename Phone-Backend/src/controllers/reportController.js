@@ -1,8 +1,7 @@
 const Order = require('../models/Order');
 const Product = require('../models/Product');
-const User = require('../models/User');
-const { ApiResponse, ApiError } = require('../utils/apiResponse');
-const { Op, fn, col, literal } = require('sequelize');
+const { ApiResponse } = require('../utils/apiResponse');
+const { Op, fn, col } = require('sequelize');
 const ExcelJS = require('exceljs');
 const PDFDocument = require('pdfkit');
 

@@ -40,7 +40,6 @@ const connectDB = async () => {
     const Notification = require('../models/Notification');
     const SearchHistory = require('../models/SearchHistory');
     const OrderTracking = require('../models/OrderTracking');
-    const Category = require('../models/Category');
     const RecentlyViewed = require('../models/RecentlyViewed');
     const FlashSale = require('../models/FlashSale');
     const FlashSaleItem = require('../models/FlashSaleItem');

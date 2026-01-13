@@ -19,7 +19,7 @@ exports.addToRecentlyViewed = async (req, res, next) => {
     }
 
     // Upsert - update viewedAt if exists, create if not
-    const [record, created] = await RecentlyViewed.upsert({
+    await RecentlyViewed.upsert({
       userId,
       productId,
       viewedAt: new Date()

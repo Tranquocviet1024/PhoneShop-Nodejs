@@ -9,7 +9,6 @@ const {
 } = require('../utils/tokenUtils');
 const { ApiError } = require('../utils/apiResponse');
 const IntrospectResponse = require('../dtos/IntrospectResponse');
-const { v4: uuidv4 } = require('uuid');
 
 /**
  * AuthenticationService

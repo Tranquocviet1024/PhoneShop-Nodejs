@@ -3,6 +3,7 @@
     "@google/generative-ai": "^0.24.1",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
     "multer": "^2.0.2"
   }
 }

@@ -1,5 +1,4 @@
 const Coupon = require('../models/Coupon');
-const CouponUsage = require('../models/CouponUsage');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
 const { Op } = require('sequelize');
 

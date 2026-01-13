@@ -1,6 +1,5 @@
 const Notification = require('../models/Notification');
 const { ApiResponse, ApiError } = require('../utils/apiResponse');
-const { Op } = require('sequelize');
 
 // Lấy thông báo của user
 exports.getNotifications = async (req, res, next) => {

@@ -1,8 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 const { sequelize } = require('./src/config/database');
-const Category = require('./src/models/Category');
 const Product = require('./src/models/Product');
+
+// Silence sequelize unused warning - needed for db connection
+void sequelize;
 
 async function importData() {
   try {
@@ -31,7 +33,7 @@ async function importData() {
     let skippedCount = 0;
 
     for (const product of productsData) {
-      const [newProduct, created] = await Product.findOrCreate({
+      const [, created] = await Product.findOrCreate({
         where: { 
           name: product.name,
           category: product.category
