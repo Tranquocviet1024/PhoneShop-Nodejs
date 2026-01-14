@@ -56,7 +56,11 @@ const HomePage = () => {
             </Link>
           </div>
           <div className="md:w-1/2 text-center">
-            <div className="text-8xl">📱</div>
+            <img 
+              src="/logo.jpg" 
+              alt="PhoneShop Logo" 
+              className="w-64 h-64 mx-auto object-contain rounded-2xl shadow-2xl"
+            />
           </div>
         </div>
       </section>
