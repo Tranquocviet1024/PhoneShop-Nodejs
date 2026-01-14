@@ -22,9 +22,11 @@ const Header = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">📱</span>
-            </div>
+            <img 
+              src="/logo.jpg" 
+              alt="PhoneShop Logo" 
+              className="w-10 h-10 rounded-lg object-contain"
+            />
             <span className="text-2xl font-bold text-dark hidden sm:inline">PhoneShop</span>
           </Link>
 
